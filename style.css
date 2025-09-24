@@ -265,3 +265,28 @@ main h4 {
 .btn-resetar:hover {
   background-color: #c0392b; /* Vermelho mais escuro */
 }
+
+/* === Estilos do Footer ===*/
+
+footer {
+  background-color: #2c3e50; /* Mesma cor do header para criar harmonia */
+  color: #ecf0f1; /* Um cinza bem claro, quase branco */
+  text-align: center;
+  padding: 20px 0;
+  margin-top: 40px; /* Um espaço para separar do conteúdo principal */
+}
+
+footer p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+footer a {
+  color: #3498db; /* Azul dos botões para dar destaque ao link */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+footer a:hover {
+  text-decoration: underline; /* Efeito padrão para links ao passar o mouse */
+}
