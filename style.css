@@ -1,0 +1,267 @@
+/* Estilos gerais */
+body {
+  font-family: sans-serif;
+  margin: 0;
+  background-color: #f4f4f4;
+}
+
+header {
+  background-color: #2c3e50;
+  color: white;
+  padding: 15px 20px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+}
+
+nav {
+  text-align: center;
+  background-color: #34495e;
+  padding: 10px;
+}
+
+nav button {
+  margin: 0 5px;
+  background-color: #3498db;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+}
+
+nav button:hover {
+  background-color: #2980b9;
+}
+
+main {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* --- CORREÇÃO PRINCIPAL AQUI --- */
+
+/* Esconde a seção por padrão. O JS vai remover essa classe para mostrar. */
+main > section.hidden {
+  display: none;
+}
+
+/* Define como as seções devem se comportar QUANDO ESTÃO VISÍVEIS */
+main > section {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centraliza o conteúdo da seção */
+  width: 100%;
+}
+
+/* Estilos para os títulos das seções */
+main h2 {
+  color: #333;
+  margin-bottom: 20px;
+}
+main h3 {
+  color: #555;
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
+main h4 {
+  color: #333;
+}
+
+/* Formulário e Lista de Produtos */
+#formProduto {
+  display: flex; /* Mantém o form como flex container para seus filhos */
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+#formProduto input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: calc(100% - 22px);
+}
+#formProduto button[type="submit"] {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+}
+#formProduto button[type="submit"]:hover {
+  background-color: #2980b9;
+}
+
+#listaProdutos {
+  width: 100%;
+  max-width: 600px;
+  margin-top: 20px;
+}
+#listaProdutos .produto-item {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#listaProdutos .produto-item strong {
+  color: #333;
+}
+#listaProdutos .produto-item button {
+  background-color: #e74c3c;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+#listaProdutos .produto-item button:hover {
+  background-color: #c0392b;
+}
+
+#formProduto .form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+#formProduto input[type="checkbox"] {
+  width: auto; /* Reseta a largura do checkbox */
+}
+
+/* Estilo para quando o campo de custo estiver desabilitado */
+#custoProduto:disabled {
+  background-color: #e9ecef; /* Cor de fundo cinza */
+  cursor: not-allowed; /* Muda o cursor para indicar que não é clicável */
+}
+
+/* Tela do Caixa */
+#produtosParaVenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 30px;
+  width: 100%;
+}
+#produtosParaVenda button {
+  min-width: 120px;
+  min-height: 80px;
+  background-color: #2ecc71;
+  color: white;
+  font-size: 1.1em;
+  font-weight: bold;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+#produtosParaVenda button:hover {
+  background-color: #27ae60;
+  transform: translateY(-2px);
+}
+.carrinho {
+  margin-top: 20px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 15px 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.carrinho h3 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 1px dashed #ccc;
+  padding-bottom: 10px;
+}
+.carrinho ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 15px;
+}
+.carrinho ul li {
+  padding: 5px 0;
+  border-bottom: 1px dotted #eee;
+  color: #555;
+}
+.carrinho ul li:last-child {
+  border-bottom: none;
+}
+.carrinho h4 {
+  text-align: right;
+  color: #333;
+  font-size: 1.3em;
+  margin-top: 15px;
+}
+#btnFinalizarVenda {
+  background-color: #e67e22;
+  width: 100%;
+  padding: 12px;
+  font-size: 1.1em;
+  border-radius: 6px;
+}
+#btnFinalizarVenda:hover {
+  background-color: #d35400;
+}
+
+/* Tela de Relatório */
+#telaRelatorio {
+  width: 100%;
+  max-width: 500px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+#telaRelatorio p {
+  font-size: 1.1em;
+  margin-bottom: 10px;
+  color: #444;
+}
+#telaRelatorio strong {
+  color: #2c3e50;
+}
+/* Adicione este código ao final do seu style.css */
+
+.area-reset {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px dashed #ccc;
+  width: 100%;
+  max-width: 500px; /* Mesma largura do container do relatório */
+  display: flex;
+  justify-content: center;
+}
+
+.btn-resetar {
+  background-color: #e74c3c; /* Vermelho forte */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn-resetar:hover {
+  background-color: #c0392b; /* Vermelho mais escuro */
+}

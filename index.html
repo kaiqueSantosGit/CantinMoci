@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CantinMoci - Gestão da Cantina</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>CantinMoci</h1>
+    </header>
+
+    <nav>
+      <button id="btnNavEstoque">Gestão de Estoque</button>
+      <button id="btnNavCaixa">Caixa (PDV)</button>
+      <button id="btnNavRelatorio">Relatório</button>
+    </nav>
+
+    <main>
+      <section id="telaEstoque">
+        <h2>Gestão de Estoque</h2>
+        <form id="formProduto">
+          <input type="hidden" id="produtoId" />
+          <input
+            type="text"
+            id="nomeProduto"
+            placeholder="Nome do Produto"
+            required
+          />
+          <input
+            type="number"
+            id="qtdProduto"
+            placeholder="Quantidade"
+            required
+          />
+
+          <div class="form-row">
+            <input type="checkbox" id="isDonation" />
+            <label for="isDonation">Este item é uma doação?</label>
+          </div>
+
+          <input
+            type="number"
+            id="custoProduto"
+            step="0.01"
+            placeholder="Preço de Custo (R$)"
+            required
+          />
+          <input
+            type="number"
+            id="vendaProduto"
+            step="0.01"
+            placeholder="Preço de Venda (R$)"
+            required
+          />
+          <button type="submit">Salvar Produto</button>
+        </form>
+        <h3>Produtos Cadastrados</h3>
+        <div id="listaProdutos"></div>
+      </section>
+
+      <section id="telaCaixa" class="hidden">
+        <h2>Caixa</h2>
+        <div id="produtosParaVenda"></div>
+        <div class="carrinho">
+          <h3>Comanda</h3>
+          <ul id="itensCarrinho"></ul>
+          <h4>Total: R$ <span id="totalVenda">0.00</span></h4>
+          <button id="btnFinalizarVenda">Finalizar Venda</button>
+        </div>
+      </section>
+
+      <section id="telaRelatorio" class="hidden">
+        <h2>Relatório Financeiro</h2>
+        <p>Total Investido (Custo): R$ <span id="totalInvestido">0.00</span></p>
+        <p>
+          Total Arrecadado (Vendas): R$ <span id="totalArrecadado">0.00</span>
+        </p>
+        <p>
+          <strong>Lucro Bruto: R$ <span id="lucroBruto">0.00</span></strong>
+        </p>
+
+        <div class="acoes-dados">
+          <button id="btnExportar">Exportar Dados (Backup)</button>
+          <label for="inputImportar" class="btn-importar">Importar Dados</label>
+          <input
+            type="file"
+            id="inputImportar"
+            accept=".json"
+            style="display: none"
+          />
+        </div>
+
+        <div class="area-reset">
+          <button id="btnResetarCaixa" class="btn-resetar">
+            RESETAR VALOR DO CAIXA
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
