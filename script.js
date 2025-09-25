@@ -61,8 +61,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const id = document.getElementById("produtoId").value;
     const nome = document.getElementById("nomeProduto").value.trim();
     const qtdAdicionar = parseInt(document.getElementById("qtdProduto").value);
-    const custoAdicionar = parseFloat(custoProdutoInput.value);
     const venda = parseFloat(document.getElementById("vendaProduto").value);
+
+    let custoAdicionar;
+    if (isDonationCheckbox.checked) {
+      custoAdicionar = 0;
+    } else {
+      custoAdicionar = parseFloat(custoProdutoInput.value);
+    }
+
+    if (!nome || isNaN(qtdAdicionar) || isNaN(venda) || isNaN(custoAdicionar)) {
+      alert(
+        "Por favor, preencha todos os campos corretamente com valores válidos."
+      );
+      return;
+    }
 
     if (id) {
       const index = produtos.findIndex((p) => p.id == id);
@@ -93,8 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         produtoExistente.qtd = novaQtdTotal;
         produtoExistente.custo = novoCustoMedio;
-        // O preço de venda não é mais atualizado automaticamente.
-        // Para alterá-lo, o usuário deve usar o botão "Editar".
       } else {
         const novoProduto = {
           id: Date.now(),
@@ -126,30 +137,31 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("cantinMoci_produtos", JSON.stringify(produtos));
   }
 
+  // FUNÇÃO ATUALIZADA PARA SER MAIS ROBUSTA
   function renderizarListaProdutos() {
     listaProdutosDiv.innerHTML = "";
     produtos.forEach((p) => {
+      // Verificação para garantir que os dados são válidos antes de exibir
+      const nome = p.nome || "Produto sem nome";
+      const qtd = p.qtd || 0;
+      const custo = p.custo || 0;
+      const venda = p.venda || 0;
+      const id = p.id;
+
       const produtoDiv = document.createElement("div");
       produtoDiv.className = "produto-item";
-      const custoDisplay =
-        p.custo === 0 ? "(Doação)" : `R$ ${p.custo.toFixed(2)}`;
+      const custoDisplay = custo === 0 ? "(Doação)" : `R$ ${custo.toFixed(2)}`;
 
       produtoDiv.innerHTML = `
         <div>
-            <strong>${p.nome}</strong><br>
-            <small>Estoque: ${
-              p.qtd
-            } un. | Custo Ponderado: ${custoDisplay} | Venda: R$ ${p.venda.toFixed(
+            <strong>${nome}</strong><br>
+            <small>Estoque: ${qtd} un. | Custo Ponderado: ${custoDisplay} | Venda: R$ ${venda.toFixed(
         2
       )}</small>
         </div>
         <div>
-            <button onclick="prepararEdicao(${
-              p.id
-            })" class="btn-editar">Editar</button>
-            <button onclick="excluirProduto(${
-              p.id
-            })" class="btn-excluir">Excluir</button>
+            <button onclick="prepararEdicao(${id})" class="btn-editar">Editar</button>
+            <button onclick="excluirProduto(${id})" class="btn-excluir">Excluir</button>
         </div>
       `;
       listaProdutosDiv.appendChild(produtoDiv);
@@ -190,6 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // --- LÓGICA DA TELA DE CAIXA ---
+  // ... (o restante do código permanece o mesmo)
   function renderizarProdutosParaVenda() {
     produtosParaVendaDiv.innerHTML = "";
     produtos.forEach((p) => {
@@ -285,18 +298,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- LÓGICA DA TELA DE RELATÓRIO E AÇÕES ---
   function atualizarRelatorio() {
-    const totalInvestidoGeral = produtos.reduce(
+    // Valor de custo dos produtos que AINDA ESTÃO no estoque
+    const custoDoEstoqueAtual = produtos.reduce(
       (acc, p) => acc + p.custo * p.qtd,
       0
     );
-    const totalArrecadado = vendas.reduce((acc, v) => acc + v.total, 0);
+
+    // Valor de custo dos produtos que JÁ FORAM vendidos
     const custoDosItensVendidos = vendas
       .flatMap((venda) => venda.itens)
       .reduce((acc, item) => acc + item.custo * item.qtd, 0);
+
+    // CÁLCULO CORRETO: O investimento total é a soma do que ainda tem com o que já saiu.
+    const totalInvestidoReal = custoDoEstoqueAtual + custoDosItensVendidos;
+
+    // Total arrecadado com as vendas (continua o mesmo)
+    const totalArrecadado = vendas.reduce((acc, v) => acc + v.total, 0);
+
+    // Lucro bruto (continua o mesmo)
     const lucroBruto = totalArrecadado - custoDosItensVendidos;
 
+    // --- ATUALIZAÇÃO DO HTML COM OS VALORES CORRETOS ---
     document.getElementById("totalInvestido").innerText =
-      totalInvestidoGeral.toFixed(2);
+      totalInvestidoReal.toFixed(2);
     document.getElementById("totalArrecadado").innerText =
       totalArrecadado.toFixed(2);
     document.getElementById("lucroBruto").innerText = lucroBruto.toFixed(2);
