@@ -137,11 +137,9 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("cantinMoci_produtos", JSON.stringify(produtos));
   }
 
-  // FUNÇÃO ATUALIZADA PARA SER MAIS ROBUSTA
   function renderizarListaProdutos() {
     listaProdutosDiv.innerHTML = "";
     produtos.forEach((p) => {
-      // Verificação para garantir que os dados são válidos antes de exibir
       const nome = p.nome || "Produto sem nome";
       const qtd = p.qtd || 0;
       const custo = p.custo || 0;
@@ -193,16 +191,22 @@ document.addEventListener("DOMContentLoaded", () => {
     window.scrollTo(0, 0);
   };
 
+  // ===== FUNÇÃO CORRIGIDA E VERIFICADA =====
   window.excluirProduto = (id) => {
     if (confirm("Tem certeza que deseja excluir este produto?")) {
+      // 1. Filtra o array na memória, criando uma nova lista sem o item excluído.
       produtos = produtos.filter((p) => p.id !== id);
+
+      // 2. SALVA a nova lista no localStorage. Este é o passo crucial.
       salvarProdutos();
+
+      // 3. Renderiza a lista na tela para o usuário ver a mudança.
       renderizarListaProdutos();
     }
   };
+  // ==========================================
 
   // --- LÓGICA DA TELA DE CAIXA ---
-  // ... (o restante do código permanece o mesmo)
   function renderizarProdutosParaVenda() {
     produtosParaVendaDiv.innerHTML = "";
     produtos.forEach((p) => {
@@ -218,10 +222,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.adicionarAoCarrinho = (id) => {
     const produtoEstoque = produtos.find((p) => p.id === id);
     if (!produtoEstoque) return;
-
     const itemCarrinho = carrinho.find((item) => item.id === id);
     const qtdNoCarrinho = itemCarrinho ? itemCarrinho.qtd : 0;
-
     if (produtoEstoque.qtd > qtdNoCarrinho) {
       if (itemCarrinho) {
         itemCarrinho.qtd++;
@@ -241,7 +243,6 @@ document.addEventListener("DOMContentLoaded", () => {
   window.diminuirDoCarrinho = (id) => {
     const itemCarrinho = carrinho.find((item) => item.id === id);
     if (!itemCarrinho) return;
-
     if (itemCarrinho.qtd > 1) {
       itemCarrinho.qtd--;
     } else {
@@ -273,52 +274,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   btnFinalizarVenda.addEventListener("click", () => {
     if (carrinho.length === 0) return;
-
     carrinho.forEach((itemCarrinho) => {
       const produtoEstoque = produtos.find((p) => p.id === itemCarrinho.id);
       if (produtoEstoque) {
         produtoEstoque.qtd -= itemCarrinho.qtd;
       }
     });
-
     const totalDaVenda = carrinho.reduce(
       (acc, item) => acc + item.qtd * item.venda,
       0
     );
     vendas.push({ id: Date.now(), itens: [...carrinho], total: totalDaVenda });
     localStorage.setItem("cantinMoci_vendas", JSON.stringify(vendas));
-
     salvarProdutos();
     carrinho = [];
     renderizarCarrinho();
     renderizarProdutosParaVenda();
-
     alert("Venda realizada com sucesso!");
   });
 
   // --- LÓGICA DA TELA DE RELATÓRIO E AÇÕES ---
   function atualizarRelatorio() {
-    // Valor de custo dos produtos que AINDA ESTÃO no estoque
     const custoDoEstoqueAtual = produtos.reduce(
       (acc, p) => acc + p.custo * p.qtd,
       0
     );
-
-    // Valor de custo dos produtos que JÁ FORAM vendidos
     const custoDosItensVendidos = vendas
       .flatMap((venda) => venda.itens)
       .reduce((acc, item) => acc + item.custo * item.qtd, 0);
-
-    // CÁLCULO CORRETO: O investimento total é a soma do que ainda tem com o que já saiu.
     const totalInvestidoReal = custoDoEstoqueAtual + custoDosItensVendidos;
-
-    // Total arrecadado com as vendas (continua o mesmo)
     const totalArrecadado = vendas.reduce((acc, v) => acc + v.total, 0);
-
-    // Lucro bruto (continua o mesmo)
     const lucroBruto = totalArrecadado - custoDosItensVendidos;
-
-    // --- ATUALIZAÇÃO DO HTML COM OS VALORES CORRETOS ---
     document.getElementById("totalInvestido").innerText =
       totalInvestidoReal.toFixed(2);
     document.getElementById("totalArrecadado").innerText =
@@ -392,7 +378,6 @@ document.addEventListener("DOMContentLoaded", () => {
         "O seu estoque de PRODUTOS NÃO será alterado.\n\n" +
         "Para confirmar, digite ZERAR abaixo:"
     );
-
     if (confirmacao && confirmacao.trim().toUpperCase() === "ZERAR") {
       vendas = [];
       localStorage.setItem("cantinMoci_vendas", JSON.stringify(vendas));
