@@ -1,0 +1,27 @@
+### Registrar um novo usuário
+POST http://localhost:3333/api/signup
+Content-Type: application/json
+
+{
+  "nome": "Kaique Santos",
+  "email": "kaique@email.com",
+  "password": "senha123"
+}
+
+### Fazer login com o usuário criado
+POST http://localhost:3333/api/login
+Content-Type: application/json
+
+{
+  "email": "kaique@email.com",
+  "password": "senha123"
+}
+
+### Tentar login com senha errada (para testar)
+POST http://localhost:3333/api/login
+Content-Type: application/json
+
+{
+  "email": "kaique@email.com",
+  "password": "senhaerrada"
+}
