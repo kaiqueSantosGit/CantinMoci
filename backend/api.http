@@ -1,0 +1,51 @@
+### Registrar um novo usuário
+POST http://localhost:3333/api/signup
+Content-Type: application/json
+
+{
+  "nome": "Kaique Santos",
+  "email": "kaique@email.com",
+  "password": "senha123"
+}
+
+### Fazer login com o usuário criado
+POST http://localhost:3333/api/login
+Content-Type: application/json
+
+{
+  "email": "kaique@email.com",
+  "password": "senha123"
+}
+
+### Tentar login com senha errada (para testar)
+POST http://localhost:3333/api/login
+Content-Type: application/json
+
+{
+  "email": "kaique@email.com",
+  "password": "senhaerrada"
+}
+
+### =======================================
+### TESTES DE EVENTOS (PRECISA DE TOKEN)
+### =======================================
+
+### Listar todos os eventos (deve retornar um array vazio no início)
+GET http://localhost:3333/api/eventos
+Authorization: Bearer SEU_TOKEN_AQUI
+
+
+### Criar um novo evento
+POST http://localhost:3333/api/eventos
+Content-Type: application/json
+Authorization: Bearer 
+{
+  "nome": "EGM 2025",
+  "ano": 2025,
+  "regional": "São Paulo",
+  "tipo": "EGM"
+}
+
+### Tentar listar os eventos novamente (agora deve aparecer o que foi criado)
+GET http://localhost:3333/api/eventos
+Authorization: Bearer SEU_TOKEN_AQUI
