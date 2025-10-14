@@ -7,6 +7,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
 
+// NOVO: Importa nosso middleware de autenticação
+const authMiddleware = require("./middleware/auth.js");
+
 const JWT_SECRET = "seu-segredo-super-secreto-aqui-trocar-depois"; // Em um projeto real, isso viria de uma variável de ambiente
 
 // ROTA DE REGISTRO (SIGNUP)
@@ -17,6 +20,12 @@ router.post("/signup", async (req, res) => {
     return res
       .status(400)
       .json({ error: "Nome, email e senha são obrigatórios." });
+  }
+
+  // ===== NOVA VERIFICAÇÃO DE FORMATO DE EMAIL =====
+  const emailRegex = /\S+@\S+\.\S+/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: "Formato de email inválido." });
   }
 
   try {
@@ -85,6 +94,49 @@ router.post("/login", (req, res) => {
         email: user.email,
       },
     });
+  });
+});
+
+// --- NOVAS ROTAS DE EVENTOS (protegidas pelo authMiddleware) ---
+
+// ROTA PARA CRIAR UM NOVO EVENTO
+router.post("/eventos", authMiddleware, (req, res) => {
+  // authMiddleware já validou o token e adicionou req.userId
+  const { nome, ano, regional, tipo } = req.body;
+  const usuario_id = req.userId; // Pegamos o ID do usuário logado a partir do token
+  const id = uuidv4();
+
+  if (!nome || !ano || !tipo) {
+    return res
+      .status(400)
+      .json({ error: "Nome, ano e tipo do evento são obrigatórios." });
+  }
+
+  const sql =
+    "INSERT INTO eventos (id, usuario_id, nome, ano, regional, tipo) VALUES (?,?,?,?,?,?)";
+  const params = [id, usuario_id, nome, ano, regional, tipo];
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      return res
+        .status(500)
+        .json({ error: "Erro ao criar o evento no banco de dados." });
+    }
+    // Retorna o objeto completo do evento criado
+    res.status(201).json({ id, usuario_id, nome, ano, regional, tipo });
+  });
+});
+
+// ROTA PARA LISTAR TODOS OS EVENTOS DO USUÁRIO LOGADO
+router.get("/eventos", authMiddleware, (req, res) => {
+  const usuario_id = req.userId; // Pegamos o ID do usuário logado a partir do token
+
+  const sql = "SELECT * FROM eventos WHERE usuario_id = ? ORDER BY ano DESC";
+  db.all(sql, [usuario_id], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: "Erro ao buscar eventos." });
+    }
+    res.json({ eventos: rows });
   });
 });
 

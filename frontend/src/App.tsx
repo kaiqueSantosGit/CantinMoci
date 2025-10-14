@@ -1,35 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react"; // 'useEffect' foi removido desta linha
+import Login from "./components/Login";
+import EventSetup from "./components/EventSetup";
+import "./index.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [currentEventId, setCurrentEventId] = useState<string | null>(null);
+
+  const handleLogin = (token: string, id: string) => {
+    setAccessToken(token);
+    setUserId(id);
+  };
+
+  const handleLogout = () => {
+    setAccessToken(null);
+    setUserId(null);
+    setCurrentEventId(null);
+  };
+
+  const handleEventSelected = (eventId: string) => {
+    setCurrentEventId(eventId);
+  };
+
+  if (!accessToken || !userId) {
+    return <Login onLogin={handleLogin} />;
+  }
+
+  if (!currentEventId) {
+    return (
+      <EventSetup
+        accessToken={accessToken}
+        userId={userId}
+        onEventSelected={handleEventSelected}
+        onLogout={handleLogout}
+      />
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h1>Bem-vindo ao Evento ID: {currentEventId}</h1>
+      <p>Aqui entrará o sistema principal (Caixa, Estoque, Relatório).</p>
+      <button onClick={() => setCurrentEventId(null)}>
+        Voltar para seleção de eventos
+      </button>
+    </div>
+  );
 }
 
-export default App
+export default App;
