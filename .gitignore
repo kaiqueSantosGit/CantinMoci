@@ -1,0 +1,21 @@
+# Arquivos compilados do Maven
+target/
+
+# Configurações locais com dados sensíveis
+**/application.properties
+**/application-local.properties
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Claude Code
+.claude/
