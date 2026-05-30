@@ -69,24 +69,24 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 1 — Setup do Projeto Spring Boot ⏳ EM ANDAMENTO
+### Fase 1 — Setup do Projeto Spring Boot ✅ CONCLUÍDA
 
 **Objetivo:** Criar a estrutura base do backend, conectar ao banco e subir a primeira rota.
 
 **Etapas:**
-- [ ] Criar projeto via Spring Initializr (start.spring.io)
-- [ ] Entender a estrutura de arquivos gerada
-- [ ] Configurar `application.properties` (conexão com PostgreSQL)
-- [ ] Criar banco de dados `cantinmoci` no PostgreSQL
-- [ ] Criar endpoint de teste `GET /health`
-- [ ] Testar no Postman
-- [ ] Primeiro commit no Git
+- [x] Criar projeto via Spring Initializr (start.spring.io)
+- [x] Entender a estrutura de arquivos gerada
+- [x] Configurar `application.properties` (conexão com PostgreSQL)
+- [x] Criar banco de dados `cantinmoci` no PostgreSQL
+- [x] Criar endpoint de teste `GET /health`
+- [x] Testar no Postman
+- [x] Primeiro commit no Git
 
-**Dependências Spring Boot a adicionar:**
+**Dependências Spring Boot adicionadas:**
 - Spring Web — para criar APIs REST
 - Spring Data JPA — para comunicação com o banco via código Java
 - PostgreSQL Driver — driver de conexão com o PostgreSQL
-- Spring Boot DevTools — reinicio automático do servidor em desenvolvimento
+- Spring Boot DevTools — reinício automático do servidor em desenvolvimento
 
 ---
 
@@ -145,6 +145,8 @@ Cada funcionalidade segue este fluxo antes de avançar:
 | 2026-05-29 | Maven como build tool (não Gradle) | Mais simples para aprendizado, mais documentação disponível |
 | 2026-05-29 | PostgreSQL 17 | Banco robusto, melhor suporte com Spring Boot/JPA |
 | 2026-05-29 | Maven instalado em `%USERPROFILE%\dev-tools` | Evitar necessidade de permissão de admin |
+| 2026-05-29 | Spring Boot 3.5.14 (não 4.x) | Versão mais estável com maior documentação disponível |
+| 2026-05-29 | `application.properties` no `.gitignore` | Proteger senha do banco de dados no GitHub |
 
 ---
 
