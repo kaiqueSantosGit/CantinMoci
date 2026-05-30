@@ -10,7 +10,7 @@
 | Camada | Tecnologia | Versão |
 |---|---|---|
 | Linguagem | Java | 21 LTS (Oracle JDK) |
-| Framework | Spring Boot | A definir na criação do projeto |
+| Framework | Spring Boot | 3.5.14 |
 | Banco de Dados | PostgreSQL | 17.10 |
 | Build | Maven | 3.9.16 |
 | Visual DB | DBeaver | 26.0.5 (Community) |
