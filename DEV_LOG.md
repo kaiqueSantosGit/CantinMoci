@@ -15,7 +15,7 @@
 | Build | Maven | 3.9.16 |
 | Visual DB | DBeaver | 26.0.5 (Community) |
 | Versionamento | Git + GitHub | Git 2.51.2 |
-| API Testing | Postman | (instalar quando chegar na fase de testes) |
+| API Testing | Postman | (instalado e em uso) |
 | Frontend | A definir | Candidatos: HTML/CSS/JS ou React |
 
 ---
@@ -90,17 +90,27 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 2 — Módulo Produto (CRUD) ⏳ NÃO INICIADA
+### Fase 2 — Módulo Produto (CRUD) ✅ CONCLUÍDA
 
 **Objetivo:** Criar o CRUD completo de produtos com banco de dados.
 
 **Etapas:**
-- [ ] Modelar entidade `Produto`
-- [ ] Criar tabela no PostgreSQL
-- [ ] Criar camadas: Model → Repository → Service → Controller → DTO
-- [ ] Implementar endpoints REST
-- [ ] Testar no Postman
-- [ ] Documentar
+- [x] Modelar entidade `Produto`
+- [x] Criar tabela no PostgreSQL (via ddl-auto=update)
+- [x] Criar camadas: Model → Repository → Service → Controller → DTO
+- [x] Implementar endpoints REST
+- [x] Roteiro de testes manuais gerado — `docs/qa/test-produto.md`
+- [x] Executar 10 testes no Postman — todos passando
+- [x] Documentar
+
+**Endpoints implementados:**
+| Método | Rota | Descrição | Status esperado |
+|---|---|---|---|
+| GET | /produtos | Listar todos os ativos | 200 OK |
+| GET | /produtos/{id} | Buscar por ID | 200 OK / 404 |
+| POST | /produtos | Criar produto | 201 Created / 400 |
+| PUT | /produtos/{id} | Atualizar produto | 200 OK / 404 |
+| DELETE | /produtos/{id} | Soft delete | 204 No Content / 404 |
 
 ---
 
