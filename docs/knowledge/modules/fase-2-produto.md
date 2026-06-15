@@ -1,8 +1,8 @@
 # Fase 2 — Módulo Produto (CRUD)
 
-Tags: #modulo #em-andamento #crud #produto
+Tags: #modulo #concluido #crud #produto
 
-Status: ⏳ Em andamento — backend implementado, testes aguardando execução
+Status: ✅ Concluída — backend implementado e 10 testes Postman validados (2026-06-15)
 
 ---
 
@@ -42,12 +42,12 @@ Status: ⏳ Em andamento — backend implementado, testes aguardando execução
 
 | Critério | Status |
 |---|---|
-| Criar produto com dados válidos retorna 201 | Aguardando execução |
-| Body inválido retorna 400 com mensagem | Aguardando execução |
-| Buscar ID inexistente retorna 404 | Aguardando execução |
-| Soft delete não apaga o registro | Aguardando execução |
-| Listagem retorna apenas produtos ativos | Aguardando execução |
-| PUT atualiza preço/estoque sem alterar `ativo` | Aguardando execução |
+| Criar produto com dados válidos retorna 201 | ✅ Validado |
+| Body inválido retorna 400 com mensagem | ✅ Validado |
+| Buscar ID inexistente retorna 404 | ✅ Validado |
+| Soft delete não apaga o registro | ✅ Validado |
+| Listagem retorna apenas produtos ativos | ✅ Validado |
+| PUT atualiza preço/estoque sem alterar `ativo` | ✅ Validado |
 
 ## Casos de erro mapeados
 

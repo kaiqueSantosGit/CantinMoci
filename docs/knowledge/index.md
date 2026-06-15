@@ -16,9 +16,7 @@
 
 ## Módulos implementados
 - [[fase-1-setup]] ✅ — ambiente e endpoint /health
-
-## Módulos em andamento
-- [[fase-2-produto]] ⏳ — CRUD completo de Produto
+- [[fase-2-produto]] ✅ — CRUD completo de Produto (10 testes Postman validados)
 
 ## Módulos futuros
 - [[fase-3-auth]] — autenticação JWT
