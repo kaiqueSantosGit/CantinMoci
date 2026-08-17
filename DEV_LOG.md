@@ -114,27 +114,30 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 3 — Módulo Autenticação ✅ IMPLEMENTADA (validada em produção; roteiro Postman formal ainda pendente)
+### Fase 3 — Módulo Autenticação ✅ CONCLUÍDA (fechada em 2026-08-17)
 
 - [x] Enum Cargo (ADMIN, OPERADOR)
 - [x] Entidade Usuario (id, nome, email, senha hash BCrypt, cargo) — implementa UserDetails
-- [x] UsuarioRepository — findByEmail(String)
-- [x] DTOs: LoginRequestDTO, TokenResponseDTO
+- [x] UsuarioRepository — findByEmail(String), existsByEmail(String)
+- [x] DTOs: LoginRequestDTO, TokenResponseDTO, RegisterRequestDTO, UsuarioResponseDTO
 - [x] JwtService — gerar/extrair/validar token HS256 com expiração 24h
 - [x] UserDetailsServiceImpl — loadUserByUsername por email
-- [x] AuthService — autenticar com BCrypt + gerar token
+- [x] AuthService — autenticar com BCrypt + gerar token + cadastrar usuário
 - [x] JwtAuthFilter — intercepta header Authorization: Bearer
-- [x] SecurityConfig — rotas públicas: /health e /auth/login; demais: autenticadas; STATELESS
-- [x] AuthController — POST /auth/login
+- [x] SecurityConfig — rotas públicas: /health, /auth/login, /error; /auth/register exige ADMIN; demais autenticadas; STATELESS
+- [x] AuthController — POST /auth/login, POST /auth/register
 - [x] Dependências JWT e Spring Security adicionadas ao pom.xml
 - [x] Tabela `usuarios` criada automaticamente pelo Hibernate
 - [x] Validado em produção (curl): login retorna token, `/produtos` aceita o token e recusa sem ele
-- [ ] Roteiro formal `docs/qa/test-auth.md` (padrão do `test-produto.md`) — pendente
+- [x] Login inválido corrigido: retornava 500, agora retorna 401 (`UnauthorizedException`)
+- [x] Endpoint de cadastro criado (`POST /auth/register`, restrito a ADMIN) — não depende mais de INSERT manual no banco
+- [x] Roteiro formal `docs/qa/test-auth.md` (padrão do `test-produto.md`) — 11 testes
 
 **Endpoints implementados:**
 | Método | Rota | Descrição | Auth |
 |---|---|---|---|
 | POST | /auth/login | Recebe email+senha, retorna token JWT | Pública |
+| POST | /auth/register | Cadastra novo usuário | Exige token de ADMIN |
 
 **Rotas protegidas (exigem Bearer token):**
 | Método | Rota |
@@ -144,6 +147,9 @@ Cada funcionalidade segue este fluxo antes de avançar:
 | POST | /produtos |
 | PUT | /produtos/{id} |
 | DELETE | /produtos/{id} |
+| POST | /auth/register (exige especificamente ADMIN) |
+
+**Bug encontrado durante a correção do 401 → 403:** o Spring Security também filtra o redirecionamento interno do Spring para `/error` (usado para montar o corpo JSON de qualquer resposta de erro). Sem liberar essa rota, o segundo filtro sobrescrevia qualquer status de erro (401, 404...) para 403. Corrigido liberando `/error` como rota pública.
 
 ---
 
