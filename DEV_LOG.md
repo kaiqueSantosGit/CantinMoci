@@ -188,12 +188,13 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 5 — Módulo Vendas + Estoque ⏳ NÃO INICIADA
+### Fase 5 — Módulo Vendas + Estoque ⏳ PRÓXIMA
 
 - [ ] Entidades Venda e ItemVenda
 - [ ] Carrinho e finalização de venda
 - [ ] Baixa automática de estoque
 - [ ] Histórico de vendas
+- [ ] **Ponto de atenção de design (mapeado em 2026-08-17):** dois operadores vendendo o último item em estoque ao mesmo tempo (concorrência). Decidir a estratégia (lock otimista/pessimista, ou validação simples) durante a modelagem desta fase — não é uma fase separada, é um cuidado a ter dentro desta.
 
 ---
 
@@ -205,10 +206,41 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 7 — Frontend ⏳ NÃO INICIADA
+### Fase 7 — Gestão de Usuários ⏳ NÃO INICIADA
+
+**Mapeada em 2026-08-17**, a partir da lacuna encontrada com a senha placeholder do usuário ADMIN. Objetivo: dar autonomia de conta a quem usa o sistema, sem depender de SQL manual no Neon.
+
+- [ ] `PUT /auth/me/senha` (ou similar) — usuário logado troca a própria senha
+- [ ] `GET /usuarios` — ADMIN lista usuários cadastrados
+- [ ] `DELETE /usuarios/{id}` — ADMIN desativa usuário (soft delete, mesmo padrão do `Produto`)
+- [ ] `PUT /usuarios/{id}/senha` — ADMIN reseta a senha de outro usuário (cobre "esqueci minha senha", já que não teremos fluxo de email nesta fase)
+
+---
+
+### Fase 8 — Frontend ⏳ NÃO INICIADA
 
 - [ ] Definir tecnologia
 - [ ] Telas principais
+- [ ] **Configurar CORS no backend** (mapeado em 2026-08-17) — o `SecurityConfig` hoje não libera nenhuma origem além do próprio backend; o frontend só vai conseguir chamar a API depois de configurar `CorsConfigurationSource` com o domínio do frontend
+
+---
+
+## Backlog de Melhorias Futuras
+
+> Mapeado em 2026-08-17, numa varredura de lacunas em todo o projeto (Produto,
+> Auth, Deploy). São itens legítimos para um sistema robusto, mas que **não
+> bloqueiam** as próximas fases — fazem mais sentido depois do sistema
+> validado com uso real em pelo menos um evento. Lista completa e priorizada
+> em [`docs/backlog.md`](docs/backlog.md).
+
+- Rate limiting / proteção contra força bruta no login
+- Revogação de token JWT (logout de verdade — hoje um token vazado é válido até expirar sozinho)
+- Auditoria — registrar quem fez cada venda/alteração
+- Paginação nas listagens (produtos, vendas, usuários) — hoje devolvem tudo de uma vez
+- Monitoramento/alerta de uptime (ex: UptimeRobot gratuito)
+- Estratégia de backup do banco (o free tier do Neon tem retenção limitada)
+- Política de senha mais forte que "mínimo 6 caracteres"
+- Tratamento de erro padronizado (`@ControllerAdvice` global, em vez de uma `@ResponseStatus` por exceção)
 
 ---
 

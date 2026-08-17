@@ -14,6 +14,7 @@ Projeto de aprendizado prático em Java + Spring Boot + PostgreSQL.
 ## Estrutura de pastas
 - backend/cantinmoci/ → projeto Spring Boot
 - docs/ → documentação técnica
+- docs/backlog.md → melhorias mapeadas, não bloqueantes, para depois do sistema validado em evento real
 - database/ → scripts SQL
 - DEV_LOG.md → progresso atual do projeto
 
@@ -24,6 +25,9 @@ Projeto de aprendizado prático em Java + Spring Boot + PostgreSQL.
 - Fase 3 ✅ Módulo Autenticação concluído (Spring Security + JWT, cadastro restrito a ADMIN, 401 correto, testado em produção)
 - Fase 4 ✅ Deploy Gratuito no ar — https://cantinmoci.onrender.com (Render + Neon)
 - Fase 5 ⏳ PRÓXIMA — Módulo Vendas + Estoque
+- Fase 6 — Módulo Eventos
+- Fase 7 — Gestão de Usuários (trocar senha, listar/desativar, admin resetar senha)
+- Fase 8 — Frontend (requer configurar CORS)
 
 ## Regras inegociáveis
 1. Explique SEMPRE antes de escrever código

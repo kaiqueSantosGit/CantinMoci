@@ -21,9 +21,13 @@
 - [[fase-4-deploy]] ✅ — no ar em https://cantinmoci.onrender.com (Render + Neon)
 
 ## Módulos futuros
-- [[fase-5-vendas]] ⏳ — sistema de vendas, próxima etapa
+- [[fase-5-vendas]] ⏳ — sistema de vendas, próxima etapa (atenção: concorrência no estoque)
 - [[fase-6-eventos]] — gestão de eventos
-- [[fase-7-frontend]] — interface web
+- [[fase-7-usuarios]] — trocar senha, listar/desativar usuário, admin resetar senha
+- [[fase-8-frontend]] — interface web (requer configurar CORS)
+
+## Backlog (pós-lançamento real)
+- [[backlog]] — melhorias mapeadas mas não bloqueantes: rate limiting, revogação de token, auditoria, paginação, backup, monitoramento
 
 ---
 
