@@ -25,7 +25,7 @@ Deixar o backend acessível publicamente pela internet, sem custo e sem depender
 ## O que foi preparado no código
 
 - `application.properties` passou a ler configuração sensível de variáveis de ambiente, com fallback para os valores locais (`${VAR:default}`) — não quebra o ambiente de desenvolvimento local
-- `application.properties.example` criado e versionado, documentando as variáveis exigidas em produção
+- `application.properties` passou a ser versionado no Git (sem segredo nenhum); segredos locais isolados em `application-local.properties` (fora do Git), importado automaticamente via `spring.config.import=optional:...`
 - `server.port` passou a ler da variável `PORT` (padrão exigido pelo Render)
 - `Dockerfile` multi-stage criado — garante Java 21 em qualquer plataforma de deploy, independente do buildpack nativo
 

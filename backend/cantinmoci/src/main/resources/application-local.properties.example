@@ -1,0 +1,8 @@
+# Copie este arquivo para "application-local.properties" e preencha com
+# valores reais para rodar o projeto localmente. O arquivo real e ignorado
+# pelo Git — nunca aparece no repositorio, seus segredos ficam so na sua
+# maquina. Veja application.properties para entender como ele e usado
+# (spring.config.import).
+
+spring.datasource.password=sua_senha_local
+jwt.secret=gere_uma_chave_base64_de_pelo_menos_32_bytes

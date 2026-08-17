@@ -28,8 +28,11 @@ Este guia está dividido em duas partes:
 - `application.properties` agora lê configurações sensíveis de variáveis de
   ambiente, com fallback pro valor local — seu ambiente continua funcionando
   exatamente como antes, sem precisar configurar nada agora.
-- `application.properties.example` documenta, no Git, quais variáveis a
-  aplicação espera em produção (sem valores reais).
+- `application.properties` agora é versionado no Git — não tem mais nenhum
+  segredo, só `${VAR}` sem valor padrão sensível. Os segredos de
+  desenvolvimento local ficam isolados em `application-local.properties`
+  (fora do Git, importado automaticamente via `spring.config.import`) — é
+  esse isolamento que torna seguro versionar o arquivo principal.
 - `Dockerfile` (em `backend/cantinmoci/Dockerfile`) builda a aplicação com
   Java 21 e gera a imagem que o Render vai rodar — isso evita depender do
   Render "adivinhar" a versão certa do Java.

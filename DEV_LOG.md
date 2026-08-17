@@ -157,8 +157,8 @@ Cada funcionalidade segue este fluxo antes de avançar:
 - Guia completo: [`docs/deploy.md`](docs/deploy.md)
 
 **Preparação do código (concluída):**
-- [x] Externalizar configuração sensível (`application.properties`) para variáveis de ambiente com fallback local — não quebra o ambiente de desenvolvimento
-- [x] Criar `application.properties.example`, versionado, documentando as variáveis exigidas em produção
+- [x] Externalizar configuração sensível para variáveis de ambiente com fallback local — não quebra o ambiente de desenvolvimento
+- [x] `application.properties` passou a ser versionado (sem segredo nenhum); segredos locais isolados em `application-local.properties` (fora do Git, importado via `spring.config.import`)
 - [x] Ajustar `server.port` para ler da variável `PORT` (exigida pelo Render)
 - [x] Criar `Dockerfile` multi-stage (garante Java 21 em qualquer plataforma)
 - [x] Escrever guia passo a passo em `docs/deploy.md`

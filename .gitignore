@@ -2,7 +2,8 @@
 target/
 
 # Configurações locais com dados sensíveis
-**/application.properties
+# application.properties agora e versionado (nao tem mais segredo nenhum,
+# so ${VAR} sem valor real) — so o arquivo local com os segredos e ignorado
 **/application-local.properties
 
 # IDEs
