@@ -114,16 +114,70 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 3 — Módulo Autenticação ⏳ NÃO INICIADA
+### Fase 3 — Módulo Autenticação ✅ IMPLEMENTADA (aguardando testes Postman)
 
-- [ ] Entidade Usuario (id, nome, email, senha, cargo)
-- [ ] Spring Security + JWT
-- [ ] Roles: ADMIN e OPERADOR
-- [ ] Proteger rotas
+- [x] Enum Cargo (ADMIN, OPERADOR)
+- [x] Entidade Usuario (id, nome, email, senha hash BCrypt, cargo) — implementa UserDetails
+- [x] UsuarioRepository — findByEmail(String)
+- [x] DTOs: LoginRequestDTO, TokenResponseDTO
+- [x] JwtService — gerar/extrair/validar token HS256 com expiração 24h
+- [x] UserDetailsServiceImpl — loadUserByUsername por email
+- [x] AuthService — autenticar com BCrypt + gerar token
+- [x] JwtAuthFilter — intercepta header Authorization: Bearer
+- [x] SecurityConfig — rotas públicas: /health e /auth/login; demais: autenticadas; STATELESS
+- [x] AuthController — POST /auth/login
+- [x] Dependências JWT e Spring Security adicionadas ao pom.xml
+- [x] Tabela `usuarios` criada automaticamente pelo Hibernate
+- [ ] Testes Postman — PRÓXIMA ETAPA
+
+**Endpoints implementados:**
+| Método | Rota | Descrição | Auth |
+|---|---|---|---|
+| POST | /auth/login | Recebe email+senha, retorna token JWT | Pública |
+
+**Rotas protegidas (exigem Bearer token):**
+| Método | Rota |
+|---|---|
+| GET | /produtos |
+| GET | /produtos/{id} |
+| POST | /produtos |
+| PUT | /produtos/{id} |
+| DELETE | /produtos/{id} |
 
 ---
 
-### Fase 4 — Módulo Vendas + Estoque ⏳ NÃO INICIADA
+### Fase 4 — Deploy Gratuito (Infraestrutura) ⏳ PRÓXIMA
+
+**Objetivo:** deixar o backend acessível publicamente pela internet, sem custo e sem depender de uma máquina pessoal ligada — para testar via Postman contra uma URL pública e futuramente usar em eventos reais.
+
+**Arquitetura escolhida:**
+- Backend → **Render** (free tier, deploy automático a partir do GitHub, via Docker)
+- Banco de Dados → **Neon** (PostgreSQL gerenciado, free tier)
+- Sem domínio próprio por enquanto — subdomínio gratuito da plataforma (`*.onrender.com`)
+- Guia completo: [`docs/deploy.md`](docs/deploy.md)
+
+**Preparação do código (concluída):**
+- [x] Externalizar configuração sensível (`application.properties`) para variáveis de ambiente com fallback local — não quebra o ambiente de desenvolvimento
+- [x] Criar `application.properties.example`, versionado, documentando as variáveis exigidas em produção
+- [x] Ajustar `server.port` para ler da variável `PORT` (exigida pelo Render)
+- [x] Criar `Dockerfile` multi-stage (garante Java 21 em qualquer plataforma)
+- [x] Escrever guia passo a passo em `docs/deploy.md`
+
+**Configuração na nuvem (usuário — passo a passo em `docs/deploy.md`):**
+- [ ] Criar conta gratuita no Neon e provisionar banco PostgreSQL
+- [ ] Criar conta gratuita no Render e conectar ao repositório GitHub
+- [ ] Configurar o Web Service no Render (runtime Docker)
+- [ ] Cadastrar variáveis de ambiente no painel do Render
+- [ ] Rodar o primeiro deploy
+
+**Validação (em conjunto):**
+- [ ] `GET /health` responde na URL pública
+- [ ] `POST /auth/login` e endpoints de `/produtos` testados no Postman contra a URL pública
+- [ ] Atualizar este DEV_LOG marcando a fase como concluída
+
+---
+
+### Fase 5 — Módulo Vendas + Estoque ⏳ NÃO INICIADA
 
 - [ ] Entidades Venda e ItemVenda
 - [ ] Carrinho e finalização de venda
@@ -132,7 +186,7 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 5 — Módulo Eventos ⏳ NÃO INICIADA
+### Fase 6 — Módulo Eventos ⏳ NÃO INICIADA
 
 - [ ] Entidade Evento
 - [ ] Isolamento de produtos e vendas por evento
@@ -140,7 +194,7 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 6 — Frontend ⏳ NÃO INICIADA
+### Fase 7 — Frontend ⏳ NÃO INICIADA
 
 - [ ] Definir tecnologia
 - [ ] Telas principais
@@ -157,6 +211,7 @@ Cada funcionalidade segue este fluxo antes de avançar:
 | 2026-05-29 | Maven instalado em `%USERPROFILE%\dev-tools` | Evitar necessidade de permissão de admin |
 | 2026-05-29 | Spring Boot 3.5.14 (não 4.x) | Versão mais estável com maior documentação disponível |
 | 2026-05-29 | `application.properties` no `.gitignore` | Proteger senha do banco de dados no GitHub |
+| 2026-08-17 | Deploy gratuito via Render (backend, Docker) + Neon (PostgreSQL) | Sistema usado esporadicamente em eventos beneficentes — não exige disponibilidade 24/7 nem justifica custo de servidor ou domínio próprio |
 
 ---
 
