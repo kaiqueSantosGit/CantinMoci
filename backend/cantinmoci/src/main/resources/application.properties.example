@@ -1,15 +1,32 @@
+# Modelo de configuracao — copie para "application.properties" e preencha
+# com valores reais para rodar localmente. O arquivo real e ignorado pelo
+# Git (.gitignore), entao ele nunca aparece no repositorio.
+#
+# Em producao (Render), NAO se usa este arquivo — as mesmas variaveis sao
+# cadastradas diretamente no painel do Render (ver docs/deploy.md).
+
 spring.application.name=cantinmoci
 
 # Banco de Dados
-spring.datasource.url=jdbc:postgresql://localhost:5432/cantinmoci
-spring.datasource.username=postgres
-spring.datasource.password=SUA_SENHA_AQUI
+# Local: aponte para o Postgres da sua maquina.
+# Producao: o Render preenche estas variaveis apontando para o banco no Neon.
+spring.datasource.url=${DATABASE_URL:jdbc:postgresql://localhost:5432/cantinmoci}
+spring.datasource.username=${DATABASE_USERNAME:postgres}
+spring.datasource.password=${DATABASE_PASSWORD:sua_senha_local}
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 # JPA
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
 
 # Servidor
-server.port=8080
+# PORT — variavel que o Render injeta automaticamente em producao.
+server.port=${PORT:8080}
+
+# JWT
+# jwt.secret — gere um valor Base64 de pelo menos 32 bytes (256 bits).
+# Use um valor DIFERENTE em producao (nunca reaproveite o local).
+jwt.secret=${JWT_SECRET:gere_uma_chave_base64_de_pelo_menos_32_bytes}
+jwt.expiration=${JWT_EXPIRATION:86400000}
