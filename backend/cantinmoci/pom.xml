@@ -61,6 +61,37 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- Spring Security — adiciona autenticacao e autorizacao ao projeto.
+		     Quando esta dependencia esta presente, o Spring protege todos os
+		     endpoints por padrao. Nos configuramos as excecoes no SecurityConfig. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<!-- JJWT — biblioteca para gerar e validar tokens JWT.
+		     Dividida em 3 artefatos:
+		       jjwt-api     — interfaces e classes publicas (compile)
+		       jjwt-impl    — implementacao interna (runtime: nao usamos diretamente)
+		       jjwt-jackson — integracao com Jackson para serializar JSON (runtime) -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.12.3</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.12.3</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.12.3</version>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
