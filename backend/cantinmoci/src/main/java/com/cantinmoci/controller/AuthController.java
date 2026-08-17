@@ -1,8 +1,12 @@
 package com.cantinmoci.controller;
 
 import com.cantinmoci.dto.LoginRequestDTO;
+import com.cantinmoci.dto.RegisterRequestDTO;
 import com.cantinmoci.dto.TokenResponseDTO;
+import com.cantinmoci.dto.UsuarioResponseDTO;
 import com.cantinmoci.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,5 +67,33 @@ public class AuthController {
         // Delega toda a logica para o AuthService e retorna o resultado com HTTP 200
         TokenResponseDTO resposta = authService.autenticar(dto);
         return ResponseEntity.ok(resposta);
+    }
+
+    // =========================================================================
+    // POST /auth/register
+    // Cadastra um novo usuario. Rota protegida — exige token de um usuario
+    // com cargo ADMIN (restricao configurada no SecurityConfig, nao aqui).
+    // =========================================================================
+
+    /**
+     * POST /auth/register
+     *
+     * So pode ser chamado com um Bearer token valido de um usuario ADMIN.
+     *
+     * Fluxo:
+     *   1. Cliente envia: { "nome", "email", "senha", "cargo" }
+     *   2. @Valid aciona as validacoes do RegisterRequestDTO (campos
+     *      obrigatorios, tamanho minimo de senha) — se invalido, HTTP 400
+     *      automatico, antes mesmo do metodo ser executado.
+     *   3. AuthService verifica se o email ja existe e cria o usuario
+     *   4. Retorna HTTP 201 Created com os dados do usuario (sem a senha)
+     *
+     * @RequestBody @Valid RegisterRequestDTO dto — corpo JSON validado
+     * @return ResponseEntity<UsuarioResponseDTO> — HTTP 201 com o usuario criado
+     */
+    @PostMapping("/register")
+    public ResponseEntity<UsuarioResponseDTO> register(@RequestBody @Valid RegisterRequestDTO dto) {
+        UsuarioResponseDTO resposta = authService.cadastrar(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
     }
 }

@@ -1,7 +1,11 @@
 package com.cantinmoci.service;
 
 import com.cantinmoci.dto.LoginRequestDTO;
+import com.cantinmoci.dto.RegisterRequestDTO;
 import com.cantinmoci.dto.TokenResponseDTO;
+import com.cantinmoci.dto.UsuarioResponseDTO;
+import com.cantinmoci.exception.EmailJaCadastradoException;
+import com.cantinmoci.exception.UnauthorizedException;
 import com.cantinmoci.model.Usuario;
 import com.cantinmoci.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -59,10 +63,6 @@ public class AuthService {
      *   Poderíamos delegar ao AuthenticationManager, mas fazer manualmente
      *   deixa o fluxo mais explicito e facil de entender para quem esta aprendendo.
      *
-     * Por que lancamos RuntimeException em vez de uma excecao customizada?
-     *   Por simplicidade nesta fase. Nas proximas fases podemos criar uma
-     *   excecao UnauthorizedException para um tratamento mais elegante.
-     *
      * @param dto — objeto com email e senha recebidos do cliente
      * @return    — TokenResponseDTO contendo o token JWT gerado
      */
@@ -73,8 +73,10 @@ public class AuthService {
         // "senha incorreta" intencionalmente — isso e uma pratica de seguranca.
         // Se dissessemos "email nao encontrado", um atacante saberia quais
         // emails existem no sistema. Com a mensagem generica, ele nao sabe.
+        // UnauthorizedException (@ResponseStatus 401) faz o Spring responder
+        // HTTP 401 automaticamente, em vez do 500 generico de antes.
         Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Credenciais invalidas"));
+                .orElseThrow(() -> new UnauthorizedException("Credenciais invalidas"));
 
         // Passo 2: Compara a senha digitada (texto puro) com o hash BCrypt.
         // passwordEncoder.matches("senha123", "$2a$10$xyz...") → true ou false
@@ -84,7 +86,7 @@ public class AuthService {
 
         if (!senhaCorreta) {
             // Mesma mensagem generica — nao revelamos se o erro foi email ou senha
-            throw new RuntimeException("Credenciais invalidas");
+            throw new UnauthorizedException("Credenciais invalidas");
         }
 
         // Passo 3: Credenciais validas — gera o token JWT para este usuario.
@@ -93,5 +95,44 @@ public class AuthService {
 
         // Passo 4: Retorna o token encapsulado no DTO de resposta
         return new TokenResponseDTO(token);
+    }
+
+    // =========================================================================
+    // CADASTRAR
+    // Cria um novo usuario no sistema. So pode ser chamado por quem ja tem
+    // um token valido de ADMIN — a restricao de acesso fica no SecurityConfig
+    // (rota /auth/register exige ROLE_ADMIN), nao aqui no service.
+    // =========================================================================
+
+    /**
+     * Cadastra um novo usuario.
+     *
+     * @param dto — nome, email, senha (texto puro) e cargo do novo usuario
+     * @return    — dados seguros do usuario criado (sem a senha)
+     */
+    public UsuarioResponseDTO cadastrar(RegisterRequestDTO dto) {
+        // Impede dois usuarios com o mesmo email — email e o "login" do
+        // sistema, precisa ser unico (a coluna no banco tambem tem
+        // unique = true, mas validar aqui devolve um erro mais claro
+        // ao cliente do que deixar o banco rejeitar com uma excecao de SQL).
+        if (usuarioRepository.existsByEmail(dto.getEmail())) {
+            throw new EmailJaCadastradoException(
+                    "Ja existe um usuario cadastrado com o email: " + dto.getEmail());
+        }
+
+        Usuario usuario = new Usuario();
+        usuario.setNome(dto.getNome());
+        usuario.setEmail(dto.getEmail());
+        // Nunca salvamos a senha em texto puro — encode() gera o hash BCrypt.
+        usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+        usuario.setCargo(dto.getCargo());
+
+        Usuario usuarioSalvo = usuarioRepository.save(usuario);
+
+        return new UsuarioResponseDTO(
+                usuarioSalvo.getId(),
+                usuarioSalvo.getNome(),
+                usuarioSalvo.getEmail(),
+                usuarioSalvo.getCargo());
     }
 }

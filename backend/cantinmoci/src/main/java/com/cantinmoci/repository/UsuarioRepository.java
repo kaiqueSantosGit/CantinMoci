@@ -34,4 +34,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     // Usado pelo AuthService (para autenticar) e pelo UserDetailsServiceImpl
     // (para o Spring Security carregar o usuario durante a validacao do token).
     Optional<Usuario> findByEmail(String email);
+
+    // Verifica se ja existe um usuario com esse email.
+    // Mais eficiente que findByEmail().isPresent() quando so precisamos
+    // saber "existe ou nao" — o Spring Data JPA gera um SELECT COUNT/EXISTS
+    // em vez de carregar a entidade inteira. Usado no cadastro, para
+    // impedir dois usuarios com o mesmo email.
+    boolean existsByEmail(String email);
 }

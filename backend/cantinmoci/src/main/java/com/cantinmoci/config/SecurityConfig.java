@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -84,7 +85,25 @@ public class SecurityConfig {
                 // Rotas PUBLICAS — nao exigem autenticacao:
                 //   GET /health       — verificar se a API esta no ar
                 //   POST /auth/login  — endpoint de login (obter o token)
-                .requestMatchers("/health", "/auth/login").permitAll()
+                //   /error            — rota interna do Spring, usada para
+                //     renderizar a resposta de erro (ex: 401, 404). Quando um
+                //     controller lanca uma excecao com @ResponseStatus, o
+                //     Spring redireciona internamente para /error antes de
+                //     montar o corpo JSON da resposta. Por padrao, o Spring
+                //     Security tambem filtra esse redirecionamento interno —
+                //     sem liberar /error aqui, ele barrava esse segundo
+                //     acesso e sobrescrevia QUALQUER erro (401, 404, etc.)
+                //     para 403, escondendo o status real da excecao original.
+                .requestMatchers("/health", "/auth/login", "/error").permitAll()
+
+                // POST /auth/register exige token valido E cargo ADMIN.
+                // hasRole("ADMIN") verifica a authority "ROLE_ADMIN" (o
+                // prefixo "ROLE_" e adicionado automaticamente pelo metodo —
+                // e o mesmo padrao que Usuario.getAuthorities() gera).
+                // Precisa vir ANTES do anyRequest().authenticated() abaixo:
+                // o Spring Security avalia essas regras na ordem declarada,
+                // e usa a primeira que combinar com a rota da requisicao.
+                .requestMatchers(HttpMethod.POST, "/auth/register").hasRole("ADMIN")
 
                 // Todas as demais rotas exigem um token JWT valido.
                 // anyRequest() — qualquer rota nao listada acima
