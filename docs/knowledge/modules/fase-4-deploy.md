@@ -2,7 +2,7 @@
 
 Tags: #modulo #infraestrutura #deploy #proxima
 
-Status: ⏳ Próxima — preparação de código concluída, configuração na nuvem pendente (usuário)
+Status: ✅ Concluída (2026-08-17) — no ar em https://cantinmoci.onrender.com
 
 ---
 
@@ -29,14 +29,22 @@ Deixar o backend acessível publicamente pela internet, sem custo e sem depender
 - `server.port` passou a ler da variável `PORT` (padrão exigido pelo Render)
 - `Dockerfile` multi-stage criado — garante Java 21 em qualquer plataforma de deploy, independente do buildpack nativo
 
-## O que falta (usuário, com passo a passo)
+## Configuração realizada
 
-Guia completo em `docs/deploy.md`:
-1. Criar banco PostgreSQL gratuito no Neon
-2. Criar conta no Render e conectar o repositório GitHub
-3. Configurar o Web Service (runtime Docker) e as variáveis de ambiente
-4. Rodar o primeiro deploy
-5. Validar `/health`, `/auth/login` e `/produtos` na URL pública
+- Neon: projeto `CantiMoci`, banco `neondb`, conexão direta (sem pooler)
+- Render: Web Service `CantinMoci`, runtime Docker, root directory `backend/cantinmoci`, região Oregon
+- Variáveis cadastradas no Render: `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`
+
+## Bug encontrado e corrigido
+
+1ª tentativa de deploy falhou com `Failed to configure a DataSource`. Causa: `application.properties` estava no `.gitignore` (protegendo a senha local) e por isso nunca chegava à imagem Docker buildada pelo Render — o jar subia sem nenhuma configuração de banco. Corrigido separando configuração versionada (`application.properties`, sem segredo) de segredos locais (`application-local.properties`, fora do Git, importado via `spring.config.import=optional:...`). Commit `d93aa1f`.
+
+## Validação
+
+- `GET /health` → 200 OK
+- `GET /produtos` sem token → 403 Forbidden
+- `POST /auth/login` com usuário de teste (inserido via SQL no Neon) → 200 OK + token
+- `GET /produtos` com token → 200 OK
 
 ## Relacionado
 

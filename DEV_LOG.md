@@ -114,7 +114,7 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 3 — Módulo Autenticação ✅ IMPLEMENTADA (aguardando testes Postman)
+### Fase 3 — Módulo Autenticação ✅ IMPLEMENTADA (validada em produção; roteiro Postman formal ainda pendente)
 
 - [x] Enum Cargo (ADMIN, OPERADOR)
 - [x] Entidade Usuario (id, nome, email, senha hash BCrypt, cargo) — implementa UserDetails
@@ -128,7 +128,8 @@ Cada funcionalidade segue este fluxo antes de avançar:
 - [x] AuthController — POST /auth/login
 - [x] Dependências JWT e Spring Security adicionadas ao pom.xml
 - [x] Tabela `usuarios` criada automaticamente pelo Hibernate
-- [ ] Testes Postman — PRÓXIMA ETAPA
+- [x] Validado em produção (curl): login retorna token, `/produtos` aceita o token e recusa sem ele
+- [ ] Roteiro formal `docs/qa/test-auth.md` (padrão do `test-produto.md`) — pendente
 
 **Endpoints implementados:**
 | Método | Rota | Descrição | Auth |
@@ -146,34 +147,38 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 4 — Deploy Gratuito (Infraestrutura) ⏳ PRÓXIMA
+### Fase 4 — Deploy Gratuito (Infraestrutura) ✅ CONCLUÍDA (2026-08-17)
 
-**Objetivo:** deixar o backend acessível publicamente pela internet, sem custo e sem depender de uma máquina pessoal ligada — para testar via Postman contra uma URL pública e futuramente usar em eventos reais.
+**Objetivo:** deixar o backend acessível publicamente pela internet, sem custo e sem depender de uma máquina pessoal ligada. Alcançado.
 
-**Arquitetura escolhida:**
-- Backend → **Render** (free tier, deploy automático a partir do GitHub, via Docker)
-- Banco de Dados → **Neon** (PostgreSQL gerenciado, free tier)
-- Sem domínio próprio por enquanto — subdomínio gratuito da plataforma (`*.onrender.com`)
+**Arquitetura em produção:**
+- Backend → **Render** (free tier, via Docker) — **https://cantinmoci.onrender.com**
+- Banco de Dados → **Neon** (PostgreSQL gerenciado, free tier, região `us-east-2`)
+- Sem domínio próprio — subdomínio gratuito do Render
 - Guia completo: [`docs/deploy.md`](docs/deploy.md)
 
-**Preparação do código (concluída):**
-- [x] Externalizar configuração sensível para variáveis de ambiente com fallback local — não quebra o ambiente de desenvolvimento
-- [x] `application.properties` passou a ser versionado (sem segredo nenhum); segredos locais isolados em `application-local.properties` (fora do Git, importado via `spring.config.import`)
-- [x] Ajustar `server.port` para ler da variável `PORT` (exigida pelo Render)
-- [x] Criar `Dockerfile` multi-stage (garante Java 21 em qualquer plataforma)
-- [x] Escrever guia passo a passo em `docs/deploy.md`
+**Preparação do código:**
+- [x] Externalizar configuração sensível para variáveis de ambiente com fallback local
+- [x] `application.properties` versionado (sem segredo nenhum); segredos locais isolados em `application-local.properties` (fora do Git, importado via `spring.config.import`)
+- [x] `server.port` lendo da variável `PORT` (exigida pelo Render)
+- [x] `Dockerfile` multi-stage (garante Java 21 em qualquer plataforma)
+- [x] Guia passo a passo em `docs/deploy.md`
 
-**Configuração na nuvem (usuário — passo a passo em `docs/deploy.md`):**
-- [ ] Criar conta gratuita no Neon e provisionar banco PostgreSQL
-- [ ] Criar conta gratuita no Render e conectar ao repositório GitHub
-- [ ] Configurar o Web Service no Render (runtime Docker)
-- [ ] Cadastrar variáveis de ambiente no painel do Render
-- [ ] Rodar o primeiro deploy
+**Configuração na nuvem:**
+- [x] Conta no Neon, banco PostgreSQL provisionado (conexão direta, sem pooler — evita conflito com o pool do HikariCP)
+- [x] Conta no Render, repositório conectado
+- [x] Web Service configurado (Docker, root directory `backend/cantinmoci`, região Oregon)
+- [x] Variáveis de ambiente cadastradas: `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`
+- [x] Deploy rodando (`Live`)
 
-**Validação (em conjunto):**
-- [ ] `GET /health` responde na URL pública
-- [ ] `POST /auth/login` e endpoints de `/produtos` testados no Postman contra a URL pública
-- [ ] Atualizar este DEV_LOG marcando a fase como concluída
+**Bug encontrado e corrigido durante o deploy:**
+- 1ª tentativa falhou (`Failed to configure a DataSource`) — `application.properties` estava no `.gitignore` e nunca chegava à imagem Docker do Render. Corrigido separando config versionada (`application.properties`) de segredos locais (`application-local.properties`, fora do Git). Ver commit `d93aa1f`.
+
+**Validação:**
+- [x] `GET /health` → 200 OK na URL pública
+- [x] `GET /produtos` sem token → 403 Forbidden (segurança ativa)
+- [x] `POST /auth/login` com usuário de teste (inserido manualmente via SQL no Neon) → 200 OK + token JWT
+- [x] `GET /produtos` com token → 200 OK
 
 ---
 

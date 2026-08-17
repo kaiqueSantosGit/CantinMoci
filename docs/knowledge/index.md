@@ -17,11 +17,11 @@
 ## Módulos implementados
 - [[fase-1-setup]] ✅ — ambiente e endpoint /health
 - [[fase-2-produto]] ✅ — CRUD completo de Produto (10 testes Postman validados)
-- [[fase-3-auth]] 🚧 — autenticação JWT implementada, aguardando testes Postman
+- [[fase-3-auth]] 🚧 — autenticação JWT implementada e validada em produção, roteiro Postman formal pendente
+- [[fase-4-deploy]] ✅ — no ar em https://cantinmoci.onrender.com (Render + Neon)
 
 ## Módulos futuros
-- [[fase-4-deploy]] ⏳ — deploy gratuito (Render + Neon), próxima etapa
-- [[fase-5-vendas]] — sistema de vendas
+- [[fase-5-vendas]] ⏳ — sistema de vendas, próxima etapa
 - [[fase-6-eventos]] — gestão de eventos
 - [[fase-7-frontend]] — interface web
 

@@ -7,7 +7,7 @@ Projeto de aprendizado prático em Java + Spring Boot + PostgreSQL.
 ## Stack
 - Backend: Java 21 + Spring Boot 3.5 + Maven
 - Banco: PostgreSQL 17 (porta 5432, usuário: postgres) — local; em produção via Neon
-- Hospedagem (Fase 4): Render (backend, free tier, via Docker) + Neon (PostgreSQL, free tier) — sem custo, sem domínio próprio, ver `docs/deploy.md`
+- Hospedagem: Render (backend, free tier, via Docker) + Neon (PostgreSQL, free tier) — no ar em https://cantinmoci.onrender.com, sem custo, sem domínio próprio, ver `docs/deploy.md`
 - Testes de API: Postman
 - OS: Windows 11
 
@@ -21,8 +21,9 @@ Projeto de aprendizado prático em Java + Spring Boot + PostgreSQL.
 - Fase 0 ✅ Ambiente configurado
 - Fase 1 ✅ Spring Boot rodando, endpoint /health ok
 - Fase 2 ✅ CRUD de Produto implementado e testado (10 testes Postman passando)
-- Fase 3 ✅ Módulo Autenticação implementado (Spring Security + JWT) — aguardando testes Postman
-- Fase 4 ⏳ PRÓXIMA — Deploy Gratuito (Render + Neon), ver `docs/deploy.md`
+- Fase 3 ✅ Módulo Autenticação implementado (Spring Security + JWT) — validado em produção, roteiro Postman formal pendente
+- Fase 4 ✅ Deploy Gratuito no ar — https://cantinmoci.onrender.com (Render + Neon)
+- Fase 5 ⏳ PRÓXIMA — Módulo Vendas + Estoque
 
 ## Regras inegociáveis
 1. Explique SEMPRE antes de escrever código
