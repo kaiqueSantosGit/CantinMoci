@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 // Importacoes de validacao — anotacoes que garantem que os dados
 // estao corretos antes de qualquer operacao.
@@ -88,6 +89,24 @@ public class Produto {
     @Column(nullable = false)
     private Boolean ativo = true;
 
+    /**
+     * Campo de controle de concorrencia otimista — usado pela Fase 5 (Vendas)
+     * para evitar que duas vendas simultaneas descontem o mesmo estoque de
+     * forma inconsistente.
+     *
+     * @Version — o Hibernate incrementa este numero automaticamente TODA VEZ
+     * que o registro e atualizado. Ao salvar, o Hibernate confere se o valor
+     * ainda e o mesmo que foi lido — se outra transacao já alterou e salvou
+     * o produto nesse meio-tempo (o numero mudou), o Hibernate lanca
+     * ObjectOptimisticLockingFailureException em vez de sobrescrever silenciosamente.
+     *
+     * Nao precisamos ler nem escrever este campo manualmente em nenhum lugar
+     * do codigo — o Hibernate cuida de tudo sozinho.
+     */
+    @Version
+    @Column(nullable = false)
+    private Long version = 0L;
+
     // =========================================================================
     // GETTERS E SETTERS
     // Metodos publicos para ler (get) e escrever (set) cada campo.
@@ -132,5 +151,13 @@ public class Produto {
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }
