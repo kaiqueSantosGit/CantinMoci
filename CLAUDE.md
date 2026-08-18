@@ -24,8 +24,8 @@ Projeto de aprendizado prático em Java + Spring Boot + PostgreSQL.
 - Fase 2 ✅ CRUD de Produto implementado e testado (10 testes Postman passando)
 - Fase 3 ✅ Módulo Autenticação concluído (Spring Security + JWT, cadastro restrito a ADMIN, 401 correto, testado em produção)
 - Fase 4 ✅ Deploy Gratuito no ar — https://cantinmoci.onrender.com (Render + Neon)
-- Fase 5 ⏳ PRÓXIMA — Módulo Vendas + Estoque
-- Fase 6 — Módulo Eventos
+- Fase 5 ✅ Módulo Vendas + Estoque concluído (carrinho persistido, lock otimista no estoque, testado localmente)
+- Fase 6 ⏳ PRÓXIMA — Módulo Eventos
 - Fase 7 — Gestão de Usuários (trocar senha, listar/desativar, admin resetar senha)
 - Fase 8 — Frontend (requer configurar CORS)
 

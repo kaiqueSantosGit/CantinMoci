@@ -188,13 +188,39 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 5 — Módulo Vendas + Estoque ⏳ PRÓXIMA
+### Fase 5 — Módulo Vendas + Estoque ✅ CONCLUÍDA (2026-08-17)
 
-- [ ] Entidades Venda e ItemVenda
-- [ ] Carrinho e finalização de venda
-- [ ] Baixa automática de estoque
-- [ ] Histórico de vendas
-- [ ] **Ponto de atenção de design (mapeado em 2026-08-17):** dois operadores vendendo o último item em estoque ao mesmo tempo (concorrência). Decidir a estratégia (lock otimista/pessimista, ou validação simples) durante a modelagem desta fase — não é uma fase separada, é um cuidado a ter dentro desta.
+**Decisões de negócio (definidas com o usuário antes de codar):**
+- Estoque insuficiente **bloqueia** a venda, com mensagem informando a quantidade disponível
+- Modelo de **carrinho persistido**: a própria `Venda` nasce com status `ABERTA` (carrinho) e só vira venda de verdade ao ser finalizada (`FINALIZADA`) — evita duplicar estrutura com uma entidade "Carrinho" separada
+- Cancelamento/estorno **fora de escopo** por enquanto (só criar e consultar)
+- Concorrência: **lock otimista** via `@Version` no `Produto`
+
+- [x] Enum `StatusVenda` (ABERTA, FINALIZADA)
+- [x] Entidade `Venda` (status, usuário, valorTotal, dataAbertura/Finalizacao, itens)
+- [x] Entidade `ItemVenda` (produto, quantidade, precoUnitario — snapshot do preço no momento da venda)
+- [x] Campo `@Version` adicionado ao `Produto` (lock otimista)
+- [x] `VendaRepository` (`findByStatus`) — sem repository próprio para ItemVenda (sempre acessado via `venda.getItens()`, cascade + orphanRemoval cuidam de salvar/apagar)
+- [x] `VendaService`: abrir, adicionar/atualizar/remover item, buscar, listar (filtro por status), finalizar
+- [x] `VendaController`: `POST /vendas`, `POST/PUT/DELETE /vendas/{id}/itens[/{itemId}]`, `GET /vendas[/{id}]`, `POST /vendas/{id}/finalizar`
+- [x] Exceções: `EstoqueInsuficienteException` (400), `OperacaoInvalidaException` (409), `VendaConcorrenteException` (409, traduz `ObjectOptimisticLockingFailureException`)
+- [x] `@Transactional` em `finalizar()` — desconto de estoque de múltiplos produtos é tudo-ou-nada
+- [x] Usuário da venda obtido via `@AuthenticationPrincipal Usuario`, nunca informado pelo cliente
+- [x] Testado localmente de ponta a ponta (14 cenários, incluindo produto desativado, estoque insuficiente, venda já finalizada, carrinho vazio)
+- [x] Roteiro formal `docs/qa/test-vendas.md`
+
+**Bug de migração encontrado e corrigido:** `ddl-auto=update` tentou `ALTER TABLE produtos ADD COLUMN version bigint NOT NULL` sem valor padrão — falha em qualquer banco com produtos já cadastrados (aconteceu no ambiente local, que já tinha dados de teste da Fase 2). Corrigido com migração manual (`ALTER TABLE ... DEFAULT 0`) antes de subir a aplicação. **Produção (Neon) não foi afetada** porque a tabela `produtos` lá ainda estava vazia — mas o cuidado fica registrado para a próxima vez que uma coluna `NOT NULL` for adicionada a uma tabela com dados.
+
+**Endpoints implementados:**
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | /vendas | Abre um carrinho novo |
+| POST | /vendas/{id}/itens | Adiciona produto ao carrinho |
+| PUT | /vendas/{id}/itens/{itemId} | Ajusta quantidade de um item |
+| DELETE | /vendas/{id}/itens/{itemId} | Remove item do carrinho |
+| GET | /vendas/{id} | Consulta uma venda |
+| GET | /vendas | Lista vendas (filtro opcional `?status=`) |
+| POST | /vendas/{id}/finalizar | Fecha o carrinho, desconta estoque |
 
 ---
 

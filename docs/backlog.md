@@ -65,6 +65,15 @@ cada evento, como prática simples enquanto não automatizamos nada.
 
 ## Qualidade de Código
 
+### Teste automatizado de concorrência no estoque
+O lock otimista (`@Version` no `Produto`, Fase 5) foi validado por revisão de
+código, mas não por um teste que reproduza de verdade duas vendas
+finalizando o mesmo produto ao mesmo tempo — isso exige um teste com duas
+threads (JUnit), não é reproduzível de forma confiável testando manualmente
+uma requisição de cada vez.
+**Quando priorizar:** ao introduzir testes automatizados no projeto de forma
+mais ampla (hoje o projeto só tem o teste padrão gerado pelo Spring Initializr).
+
 ### Tratamento de erro padronizado (`@ControllerAdvice` global)
 Hoje cada erro tem sua própria exceção com `@ResponseStatus`
 (`ResourceNotFoundException`, `UnauthorizedException`,
