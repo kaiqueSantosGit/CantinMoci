@@ -284,11 +284,34 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 8 — Frontend ⏳ NÃO INICIADA
+### Fase 8 — Frontend 🚧 EM ANDAMENTO (iniciada em 2026-08-23)
 
-- [ ] Definir tecnologia
-- [ ] Telas principais
-- [ ] **Configurar CORS no backend** (mapeado em 2026-08-17) — o `SecurityConfig` hoje não libera nenhuma origem além do próprio backend; o frontend só vai conseguir chamar a API depois de configurar `CorsConfigurationSource` com o domínio do frontend
+**Planejamento visual:** protótipo navegável (login + painel + PDV de vendas + eventos + produtos + usuários) construído e aprovado antes do código — identidade: verde profundo (`#1F5245`) + âmbar (`#C97B22`), tipografia Manrope + IBM Plex Mono pra números.
+
+**Stack escolhida:**
+| Camada | Escolha |
+|---|---|
+| Framework | React 19 + Vite 8 (JavaScript, não TypeScript — decisão deliberada pra não empilhar duas linguagens tipadas novas ao mesmo tempo) |
+| Roteamento | React Router |
+| Estilo | Tailwind CSS 4 |
+| HTTP | fetch nativo (sem axios) |
+| Estado | useState/useContext do React |
+| Deploy (futuro) | Vercel ou Netlify, free tier |
+
+**Configuração no backend (pré-requisito, feito):**
+- [x] **CORS configurado** — `CorsConfigurationSource` no `SecurityConfig`, origem lida de `CORS_ALLOWED_ORIGINS` (fallback `http://localhost:5173` em dev)
+- [x] **`GET /auth/me`** (novo) — o login só devolvia o token; esta rota devolve nome/email/cargo do usuário logado, pro frontend montar a tela
+
+**Setup do projeto (feito):**
+- [x] Projeto React criado em `frontend/cantinmoci` (Vite)
+- [x] Tokens de cor/tipografia do protótipo aplicados em `src/index.css` (com suporte a tema claro/escuro automático)
+- [x] Cliente HTTP central (`src/api/client.js`) — anexa o token JWT automaticamente, desloga sozinho em caso de 401
+- [x] `AuthContext` — sessão do usuário, restaura do token salvo ao recarregar a página
+- [x] Rotas protegidas (`ProtectedRoute`) — sem sessão válida, redireciona pro login
+- [x] `AppShell` — menu lateral + barra superior, item "Usuários" só aparece pra ADMIN
+- [x] **Tela de Login funcional de ponta a ponta** — testada no navegador (login real, `GET /auth/me`, logout, proteção de rota, tema escuro)
+- [ ] Telas dos módulos (Dashboard, Vendas, Eventos, Produtos, Usuários) — hoje são placeholders "em construção", serão construídas uma de cada vez nas próximas etapas
+- [ ] Deploy (Vercel/Netlify)
 
 ---
 

@@ -6,6 +6,7 @@ Projeto de aprendizado prático em Java + Spring Boot + PostgreSQL.
 
 ## Stack
 - Backend: Java 21 + Spring Boot 3.5 + Maven
+- Frontend: React 19 + Vite 8 + React Router + Tailwind CSS 4 (JavaScript, não TypeScript)
 - Banco: PostgreSQL 17 (porta 5432, usuário: postgres) — local; em produção via Neon
 - Hospedagem: Render (backend, free tier, via Docker) + Neon (PostgreSQL, free tier) — no ar em https://cantinmoci.onrender.com, sem custo, sem domínio próprio, ver `docs/deploy.md`
 - Testes de API: Postman
@@ -13,6 +14,7 @@ Projeto de aprendizado prático em Java + Spring Boot + PostgreSQL.
 
 ## Estrutura de pastas
 - backend/cantinmoci/ → projeto Spring Boot
+- frontend/cantinmoci/ → projeto React (Vite)
 - docs/ → documentação técnica
 - docs/backlog.md → melhorias mapeadas, não bloqueantes, para depois do sistema validado em evento real
 - database/ → scripts SQL
@@ -27,7 +29,7 @@ Projeto de aprendizado prático em Java + Spring Boot + PostgreSQL.
 - Fase 5 ✅ Módulo Vendas + Estoque concluído (carrinho persistido, lock otimista no estoque, testado localmente)
 - Fase 6 ✅ Módulo Eventos concluído (estoque por evento, 1 evento aberto por vez, relatório elaborado, testado localmente)
 - Fase 7 ✅ Gestão de Usuários concluída (trocar senha, listar/desativar, admin resetar senha, token revogado na hora ao desativar)
-- Fase 8 ⏳ PRÓXIMA — Frontend (requer configurar CORS)
+- Fase 8 🚧 Frontend em andamento (React + Vite + Tailwind, CORS configurado, login funcional; telas dos módulos ainda por construir)
 - Fase 9 — Multi-tenant / Organizações (futura, planejada — só após sistema validado em uso real)
 
 ## Regras inegociáveis
@@ -44,3 +46,7 @@ controllers/ → services/ → repositories/ → models/ → dtos/ → config/ �
 cd backend/cantinmoci
 mvnw.cmd spring-boot:run
 # Sobe em http://localhost:8080
+
+cd frontend/cantinmoci
+npm run dev
+# Sobe em http://localhost:5173 (exige o backend rodando)

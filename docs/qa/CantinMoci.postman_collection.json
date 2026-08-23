@@ -1,0 +1,506 @@
+{
+  "info": {
+    "name": "CantinMoci - API Completa",
+    "description": "Coleção completa de todos os endpoints do CantinMoci, organizada por fase. Cobre Health, Auth (Fase 3), Produtos (Fase 2), Eventos (Fase 6), Vendas (Fase 5/6) e Gestão de Usuários (Fase 7).\n\nComo usar:\n1. Importe este arquivo no Postman (File > Import).\n2. Configure as variáveis de Collection (aba 'Variables' da própria collection): baseUrl, adminEmail, adminSenha, operadorEmail, operadorSenha — NÃO deixe suas credenciais reais salvas em nenhum arquivo versionado no Git.\n3. Rode a pasta 'Auth' primeiro (login preenche o token automaticamente nas variáveis).\n4. As pastas seguem a ordem de dependência: Auth → Produtos → Eventos → Vendas → Usuarios. Rode nessa ordem na primeira vez.\n5. IDs (produtoId, eventoId, vendaId, itemId, usuarioOperadorId) são preenchidos automaticamente pelos scripts de teste de cada requisição de criação — não precisa copiar/colar manualmente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{tokenAdmin}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "description": "Troque para https://cantinmoci.onrender.com para testar produção" },
+    { "key": "adminEmail", "value": "", "description": "Preencha com o email do seu ADMIN" },
+    { "key": "adminSenha", "value": "", "description": "Preencha com a senha do seu ADMIN" },
+    { "key": "operadorEmail", "value": "operador.teste@cantinmoci.com" },
+    { "key": "operadorSenha", "value": "senha123" },
+    { "key": "tokenAdmin", "value": "" },
+    { "key": "tokenOperador", "value": "" },
+    { "key": "usuarioOperadorId", "value": "" },
+    { "key": "produtoId", "value": "" },
+    { "key": "eventoId", "value": "" },
+    { "key": "vendaId", "value": "" },
+    { "key": "itemId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth (Fase 3 e 7)",
+      "item": [
+        {
+          "name": "Login ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) { pm.collectionVariables.set('tokenAdmin', json.token); }",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"senha\": \"{{adminSenha}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login - senha errada (esperado 401)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"senha\": \"senhaErrada\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Register (cadastrar operador) - ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) { pm.collectionVariables.set('usuarioOperadorId', json.id); }",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Operador Teste\",\n  \"email\": \"{{operadorEmail}}\",\n  \"senha\": \"{{operadorSenha}}\",\n  \"cargo\": \"OPERADOR\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Register - email duplicado (esperado 409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Operador Teste\",\n  \"email\": \"{{operadorEmail}}\",\n  \"senha\": \"{{operadorSenha}}\",\n  \"cargo\": \"OPERADOR\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Login OPERADOR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) { pm.collectionVariables.set('tokenOperador', json.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{operadorEmail}}\",\n  \"senha\": \"{{operadorSenha}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Trocar a propria senha (OPERADOR)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenOperador}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"novaSenha\": \"novaSenhaOperador456\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/me/senha", "host": ["{{baseUrl}}"], "path": ["auth", "me", "senha"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Produtos (Fase 2)",
+      "item": [
+        {
+          "name": "Listar produtos ativos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/produtos", "host": ["{{baseUrl}}"], "path": ["produtos"] }
+          }
+        },
+        {
+          "name": "Criar produto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) { pm.collectionVariables.set('produtoId', json.id); }",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Coxinha\",\n  \"preco\": 5.00,\n  \"quantidadeEmEstoque\": 30\n}" },
+            "url": { "raw": "{{baseUrl}}/produtos", "host": ["{{baseUrl}}"], "path": ["produtos"] }
+          }
+        },
+        {
+          "name": "Buscar produto por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/produtos/{{produtoId}}", "host": ["{{baseUrl}}"], "path": ["produtos", "{{produtoId}}"] }
+          }
+        },
+        {
+          "name": "Atualizar produto",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Coxinha\",\n  \"preco\": 6.00,\n  \"quantidadeEmEstoque\": 25\n}" },
+            "url": { "raw": "{{baseUrl}}/produtos/{{produtoId}}", "host": ["{{baseUrl}}"], "path": ["produtos", "{{produtoId}}"] }
+          }
+        },
+        {
+          "name": "Criar produto - body invalido (esperado 400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "{{baseUrl}}/produtos", "host": ["{{baseUrl}}"], "path": ["produtos"] }
+          }
+        },
+        {
+          "name": "Buscar produto inexistente (esperado 404)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/produtos/999999", "host": ["{{baseUrl}}"], "path": ["produtos", "999999"] }
+          }
+        },
+        {
+          "name": "Desativar produto (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/produtos/{{produtoId}}", "host": ["{{baseUrl}}"], "path": ["produtos", "{{produtoId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Eventos (Fase 6)",
+      "item": [
+        {
+          "name": "Criar (abrir) evento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) { pm.collectionVariables.set('eventoId', json.id); }",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Festa Junina 2026\",\n  \"local\": \"Salão Paroquial\"\n}" },
+            "url": { "raw": "{{baseUrl}}/eventos", "host": ["{{baseUrl}}"], "path": ["eventos"] }
+          }
+        },
+        {
+          "name": "Criar evento - ja existe um aberto (esperado 409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Outro evento\",\n  \"local\": \"X\"\n}" },
+            "url": { "raw": "{{baseUrl}}/eventos", "host": ["{{baseUrl}}"], "path": ["eventos"] }
+          }
+        },
+        {
+          "name": "Alocar estoque de produto no evento",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"produtoId\": {{produtoId}},\n  \"quantidade\": 20\n}" },
+            "url": { "raw": "{{baseUrl}}/eventos/{{eventoId}}/produtos", "host": ["{{baseUrl}}"], "path": ["eventos", "{{eventoId}}", "produtos"] }
+          }
+        },
+        {
+          "name": "Listar produtos do evento",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/eventos/{{eventoId}}/produtos", "host": ["{{baseUrl}}"], "path": ["eventos", "{{eventoId}}", "produtos"] }
+          }
+        },
+        {
+          "name": "Listar eventos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/eventos", "host": ["{{baseUrl}}"], "path": ["eventos"] }
+          }
+        },
+        {
+          "name": "Buscar evento por ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/eventos/{{eventoId}}", "host": ["{{baseUrl}}"], "path": ["eventos", "{{eventoId}}"] }
+          }
+        },
+        {
+          "name": "Relatorio do evento",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/eventos/{{eventoId}}/relatorio", "host": ["{{baseUrl}}"], "path": ["eventos", "{{eventoId}}", "relatorio"] }
+          }
+        },
+        {
+          "name": "Encerrar evento",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/eventos/{{eventoId}}/encerrar", "host": ["{{baseUrl}}"], "path": ["eventos", "{{eventoId}}", "encerrar"] }
+          }
+        },
+        {
+          "name": "Alocar estoque em evento encerrado (esperado 409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"produtoId\": {{produtoId}},\n  \"quantidade\": 1\n}" },
+            "url": { "raw": "{{baseUrl}}/eventos/{{eventoId}}/produtos", "host": ["{{baseUrl}}"], "path": ["eventos", "{{eventoId}}", "produtos"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vendas (Fase 5 e 6)",
+      "item": [
+        {
+          "name": "Abrir venda - sem evento aberto (esperado 409)",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/vendas", "host": ["{{baseUrl}}"], "path": ["vendas"] }
+          }
+        },
+        {
+          "name": "Abrir venda (com evento aberto)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.id) { pm.collectionVariables.set('vendaId', json.id); }",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/vendas", "host": ["{{baseUrl}}"], "path": ["vendas"] }
+          }
+        },
+        {
+          "name": "Adicionar item ao carrinho",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.itens && json.itens.length) { pm.collectionVariables.set('itemId', json.itens[json.itens.length - 1].id); }",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"produtoId\": {{produtoId}},\n  \"quantidade\": 3\n}" },
+            "url": { "raw": "{{baseUrl}}/vendas/{{vendaId}}/itens", "host": ["{{baseUrl}}"], "path": ["vendas", "{{vendaId}}", "itens"] }
+          }
+        },
+        {
+          "name": "Adicionar item - estoque insuficiente (esperado 400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"produtoId\": {{produtoId}},\n  \"quantidade\": 99999\n}" },
+            "url": { "raw": "{{baseUrl}}/vendas/{{vendaId}}/itens", "host": ["{{baseUrl}}"], "path": ["vendas", "{{vendaId}}", "itens"] }
+          }
+        },
+        {
+          "name": "Ajustar quantidade de um item",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"quantidade\": 5\n}" },
+            "url": { "raw": "{{baseUrl}}/vendas/{{vendaId}}/itens/{{itemId}}", "host": ["{{baseUrl}}"], "path": ["vendas", "{{vendaId}}", "itens", "{{itemId}}"] }
+          }
+        },
+        {
+          "name": "Consultar venda (carrinho atual)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/vendas/{{vendaId}}", "host": ["{{baseUrl}}"], "path": ["vendas", "{{vendaId}}"] }
+          }
+        },
+        {
+          "name": "Remover item do carrinho",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/vendas/{{vendaId}}/itens/{{itemId}}", "host": ["{{baseUrl}}"], "path": ["vendas", "{{vendaId}}", "itens", "{{itemId}}"] }
+          }
+        },
+        {
+          "name": "Finalizar venda vazia (esperado 409)",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/vendas/{{vendaId}}/finalizar", "host": ["{{baseUrl}}"], "path": ["vendas", "{{vendaId}}", "finalizar"] }
+          }
+        },
+        {
+          "name": "Adicionar item de novo (para finalizar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.itens && json.itens.length) { pm.collectionVariables.set('itemId', json.itens[json.itens.length - 1].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"produtoId\": {{produtoId}},\n  \"quantidade\": 2\n}" },
+            "url": { "raw": "{{baseUrl}}/vendas/{{vendaId}}/itens", "host": ["{{baseUrl}}"], "path": ["vendas", "{{vendaId}}", "itens"] }
+          }
+        },
+        {
+          "name": "Finalizar venda",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/vendas/{{vendaId}}/finalizar", "host": ["{{baseUrl}}"], "path": ["vendas", "{{vendaId}}", "finalizar"] }
+          }
+        },
+        {
+          "name": "Alterar venda ja finalizada (esperado 409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"produtoId\": {{produtoId}},\n  \"quantidade\": 1\n}" },
+            "url": { "raw": "{{baseUrl}}/vendas/{{vendaId}}/itens", "host": ["{{baseUrl}}"], "path": ["vendas", "{{vendaId}}", "itens"] }
+          }
+        },
+        {
+          "name": "Listar vendas (todas)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/vendas", "host": ["{{baseUrl}}"], "path": ["vendas"] }
+          }
+        },
+        {
+          "name": "Listar vendas FINALIZADA",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/vendas?status=FINALIZADA",
+              "host": ["{{baseUrl}}"],
+              "path": ["vendas"],
+              "query": [{ "key": "status", "value": "FINALIZADA" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios (Fase 7 - ADMIN)",
+      "item": [
+        {
+          "name": "Listar usuarios ativos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/usuarios", "host": ["{{baseUrl}}"], "path": ["usuarios"] }
+          }
+        },
+        {
+          "name": "OPERADOR tenta listar usuarios (esperado 403)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenOperador}}", "type": "string" }] },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/usuarios", "host": ["{{baseUrl}}"], "path": ["usuarios"] }
+          }
+        },
+        {
+          "name": "ADMIN reseta senha de outro usuario",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"novaSenha\": \"senhaResetadaPeloAdmin789\"\n}" },
+            "url": { "raw": "{{baseUrl}}/usuarios/{{usuarioOperadorId}}/senha", "host": ["{{baseUrl}}"], "path": ["usuarios", "{{usuarioOperadorId}}", "senha"] }
+          }
+        },
+        {
+          "name": "ADMIN tenta se autodesativar (esperado 409)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/usuarios/1", "host": ["{{baseUrl}}"], "path": ["usuarios", "1"] }
+          }
+        },
+        {
+          "name": "Desativar usuario (soft delete)",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/usuarios/{{usuarioOperadorId}}", "host": ["{{baseUrl}}"], "path": ["usuarios", "{{usuarioOperadorId}}"] }
+          }
+        },
+        {
+          "name": "Login de usuario desativado (esperado 401)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{operadorEmail}}\",\n  \"senha\": \"{{operadorSenha}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        }
+      ]
+    }
+  ]
+}
