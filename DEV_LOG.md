@@ -255,14 +255,32 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 7 — Gestão de Usuários ⏳ NÃO INICIADA
+### Fase 7 — Gestão de Usuários ✅ CONCLUÍDA (2026-08-23)
 
 **Mapeada em 2026-08-17**, a partir da lacuna encontrada com a senha placeholder do usuário ADMIN. Objetivo: dar autonomia de conta a quem usa o sistema, sem depender de SQL manual no Neon.
 
-- [ ] `PUT /auth/me/senha` (ou similar) — usuário logado troca a própria senha
-- [ ] `GET /usuarios` — ADMIN lista usuários cadastrados
-- [ ] `DELETE /usuarios/{id}` — ADMIN desativa usuário (soft delete, mesmo padrão do `Produto`)
-- [ ] `PUT /usuarios/{id}/senha` — ADMIN reseta a senha de outro usuário (cobre "esqueci minha senha", já que não teremos fluxo de email nesta fase)
+**Decisões de negócio (definidas com o usuário antes de codar):**
+- Trocar a própria senha: **só a nova senha** — não exige confirmar a senha atual (o token JWT válido já é considerado prova de identidade suficiente)
+- Reset de senha pelo ADMIN: **o ADMIN define a nova senha** diretamente, mesmo padrão já usado no cadastro (`POST /auth/register`)
+
+- [x] `Usuario` ganha campo `ativo` (soft delete, mesmo padrão do `Produto`) — `isEnabled()` passou a refletir esse campo de verdade
+- [x] `PUT /auth/me/senha` — usuário logado troca a própria senha
+- [x] `GET /usuarios` — ADMIN lista usuários ativos
+- [x] `DELETE /usuarios/{id}` — ADMIN desativa usuário; **bloqueia autodesativação** (evita ficar travado de fora do sistema)
+- [x] `PUT /usuarios/{id}/senha` — ADMIN reseta a senha de outro usuário
+- [x] **`JwtAuthFilter` atualizado**: um usuário desativado perde acesso a QUALQUER token já emitido imediatamente, não só a novos logins — sem isso, um token emitido antes da desativação continuaria válido até expirar sozinho (até 24h depois)
+- [x] Testado localmente de ponta a ponta — 14 cenários, incluindo o teste crítico de segurança (mesmo token, antes/depois de desativar: `200` → `403`, sem novo login)
+- [x] Roteiro formal `docs/qa/test-usuarios.md`
+
+**Bug de migração evitado (aprendido na Fase 6):** `ativo` é uma coluna `NOT NULL` nova na tabela `usuarios`, que já tinha linhas cadastradas (local e produção). Migração manual (`ALTER TABLE usuarios ADD COLUMN ativo boolean NOT NULL DEFAULT true`) aplicada **antes** de subir a aplicação, tanto local quanto produção — dessa vez sem susto.
+
+**Endpoints implementados:**
+| Método | Rota | Auth | Descrição |
+|---|---|---|---|
+| PUT | /auth/me/senha | Qualquer usuário logado | Troca a própria senha |
+| GET | /usuarios | ADMIN | Lista usuários ativos |
+| DELETE | /usuarios/{id} | ADMIN | Desativa usuário (soft delete) |
+| PUT | /usuarios/{id}/senha | ADMIN | Reseta a senha de outro usuário |
 
 ---
 

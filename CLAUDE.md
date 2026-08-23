@@ -26,8 +26,8 @@ Projeto de aprendizado prático em Java + Spring Boot + PostgreSQL.
 - Fase 4 ✅ Deploy Gratuito no ar — https://cantinmoci.onrender.com (Render + Neon)
 - Fase 5 ✅ Módulo Vendas + Estoque concluído (carrinho persistido, lock otimista no estoque, testado localmente)
 - Fase 6 ✅ Módulo Eventos concluído (estoque por evento, 1 evento aberto por vez, relatório elaborado, testado localmente)
-- Fase 7 ⏳ PRÓXIMA — Gestão de Usuários (trocar senha, listar/desativar, admin resetar senha)
-- Fase 8 — Frontend (requer configurar CORS)
+- Fase 7 ✅ Gestão de Usuários concluída (trocar senha, listar/desativar, admin resetar senha, token revogado na hora ao desativar)
+- Fase 8 ⏳ PRÓXIMA — Frontend (requer configurar CORS)
 - Fase 9 — Multi-tenant / Organizações (futura, planejada — só após sistema validado em uso real)
 
 ## Regras inegociáveis
