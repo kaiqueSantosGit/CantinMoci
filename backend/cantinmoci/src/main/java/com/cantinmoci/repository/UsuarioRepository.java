@@ -3,6 +3,7 @@ package com.cantinmoci.repository;
 import com.cantinmoci.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -41,4 +42,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     // em vez de carregar a entidade inteira. Usado no cadastro, para
     // impedir dois usuarios com o mesmo email.
     boolean existsByEmail(String email);
+
+    // Lista usuarios ativos — mesmo padrao do ProdutoRepository.findByAtivoTrue().
+    // Usado por GET /usuarios (ADMIN).
+    List<Usuario> findByAtivoTrue();
 }

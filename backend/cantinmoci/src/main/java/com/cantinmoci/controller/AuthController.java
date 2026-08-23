@@ -3,12 +3,16 @@ package com.cantinmoci.controller;
 import com.cantinmoci.dto.LoginRequestDTO;
 import com.cantinmoci.dto.RegisterRequestDTO;
 import com.cantinmoci.dto.TokenResponseDTO;
+import com.cantinmoci.dto.TrocarSenhaDTO;
 import com.cantinmoci.dto.UsuarioResponseDTO;
+import com.cantinmoci.model.Usuario;
 import com.cantinmoci.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,8 +58,8 @@ public class AuthController {
      *   1. Cliente envia: { "email": "...", "senha": "..." }
      *   2. AuthService valida as credenciais
      *   3. Se validas: retorna HTTP 200 OK com { "token": "eyJ..." }
-     *   4. Se invalidas: AuthService lanca RuntimeException → HTTP 500
-     *      (nas proximas fases melhoraremos o tratamento de erro para HTTP 401)
+     *   4. Se invalidas (ou usuario desativado): AuthService lanca
+     *      UnauthorizedException → HTTP 401 automatico
      *
      * @RequestBody LoginRequestDTO dto — o Spring converte o JSON recebido
      *   automaticamente para um objeto LoginRequestDTO.
@@ -95,5 +99,31 @@ public class AuthController {
     public ResponseEntity<UsuarioResponseDTO> register(@RequestBody @Valid RegisterRequestDTO dto) {
         UsuarioResponseDTO resposta = authService.cadastrar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
+    }
+
+    // =========================================================================
+    // PUT /auth/me/senha
+    // O usuario logado troca a propria senha. Rota protegida por token, sem
+    // restricao de cargo — qualquer ADMIN ou OPERADOR pode trocar a propria.
+    // =========================================================================
+
+    /**
+     * PUT /auth/me/senha
+     *
+     * @AuthenticationPrincipal Usuario usuarioLogado — o Spring Security
+     * injeta o usuario autenticado da requisicao atual (mesmo mecanismo
+     * usado em VendaController.abrir).
+     *
+     * Decisao do projeto: nao exige confirmar a senha atual, so a nova —
+     * o token JWT valido ja e considerado prova suficiente de identidade.
+     *
+     * @return 204 No Content — trocou com sucesso, nao ha nada pra devolver.
+     */
+    @PutMapping("/me/senha")
+    public ResponseEntity<Void> trocarSenha(
+            @AuthenticationPrincipal Usuario usuarioLogado,
+            @Valid @RequestBody TrocarSenhaDTO dto) {
+        authService.trocarSenha(usuarioLogado, dto);
+        return ResponseEntity.noContent().build();
     }
 }

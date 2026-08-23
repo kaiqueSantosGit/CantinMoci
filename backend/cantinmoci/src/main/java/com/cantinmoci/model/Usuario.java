@@ -82,6 +82,17 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private Cargo cargo;
 
+    /**
+     * Indica se o usuario esta ativo no sistema (Fase 7).
+     * Mesmo padrao de soft delete usado em Produto: desativar (DELETE
+     * /usuarios/{id}) so marca este campo como false, nunca apaga o
+     * registro — preserva o historico de vendas feitas por esse usuario.
+     *
+     * O valor padrao e true: todo usuario cadastrado comeca ativo.
+     */
+    @Column(nullable = false)
+    private Boolean ativo = true;
+
     // =========================================================================
     // METODOS DA INTERFACE UserDetails
     // O Spring Security exige a implementacao destes metodos.
@@ -154,11 +165,19 @@ public class Usuario implements UserDetails {
 
     /**
      * Indica se o usuario esta ativo/habilitado no sistema.
-     * Retornamos sempre true — todos os usuarios cadastrados estao ativos.
+     *
+     * Fase 7: passou a refletir o campo "ativo" de verdade, em vez de
+     * sempre true. Isso e conferido em dois lugares:
+     *   1. JwtAuthFilter — um usuario desativado nao consegue mais usar
+     *      NENHUM token seu, mesmo um token emitido antes de ser desativado
+     *      (a autenticacao so e registrada se isEnabled() for true).
+     *   2. AuthService.autenticar() — confere explicitamente, porque este
+     *      projeto nao usa o AuthenticationManager padrao do Spring
+     *      (que checaria isEnabled() sozinho); o login e feito manualmente.
      */
     @Override
     public boolean isEnabled() {
-        return true;
+        return ativo;
     }
 
     // =========================================================================
@@ -204,5 +223,13 @@ public class Usuario implements UserDetails {
 
     public void setCargo(Cargo cargo) {
         this.cargo = cargo;
+    }
+
+    public Boolean getAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
     }
 }

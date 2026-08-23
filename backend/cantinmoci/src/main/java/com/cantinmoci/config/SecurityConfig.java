@@ -105,6 +105,13 @@ public class SecurityConfig {
                 // e usa a primeira que combinar com a rota da requisicao.
                 .requestMatchers(HttpMethod.POST, "/auth/register").hasRole("ADMIN")
 
+                // Fase 7: toda a gestao de usuarios (listar, desativar,
+                // resetar senha de outro usuario) exige ADMIN. Trocar a
+                // PROPRIA senha (PUT /auth/me/senha) NAO entra aqui —
+                // fica coberto pelo anyRequest().authenticated() abaixo,
+                // qualquer usuario logado pode trocar a propria senha.
+                .requestMatchers("/usuarios/**").hasRole("ADMIN")
+
                 // Todas as demais rotas exigem um token JWT valido.
                 // anyRequest() — qualquer rota nao listada acima
                 // authenticated() — exige que o usuario esteja autenticado

@@ -2,14 +2,21 @@ package com.cantinmoci.service;
 
 import com.cantinmoci.dto.LoginRequestDTO;
 import com.cantinmoci.dto.RegisterRequestDTO;
+import com.cantinmoci.dto.ResetarSenhaDTO;
 import com.cantinmoci.dto.TokenResponseDTO;
+import com.cantinmoci.dto.TrocarSenhaDTO;
 import com.cantinmoci.dto.UsuarioResponseDTO;
 import com.cantinmoci.exception.EmailJaCadastradoException;
+import com.cantinmoci.exception.OperacaoInvalidaException;
+import com.cantinmoci.exception.ResourceNotFoundException;
 import com.cantinmoci.exception.UnauthorizedException;
 import com.cantinmoci.model.Usuario;
 import com.cantinmoci.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service responsavel pela logica de autenticacao.
@@ -78,6 +85,14 @@ public class AuthService {
         Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new UnauthorizedException("Credenciais invalidas"));
 
+        // Passo 1.5 (Fase 7): usuario desativado nao consegue logar.
+        // Mesma mensagem generica de sempre — nao revelamos que a conta
+        // existe mas esta desativada, mesma logica de nao revelar "email
+        // nao encontrado" vs "senha errada".
+        if (!usuario.getAtivo()) {
+            throw new UnauthorizedException("Credenciais invalidas");
+        }
+
         // Passo 2: Compara a senha digitada (texto puro) com o hash BCrypt.
         // passwordEncoder.matches("senha123", "$2a$10$xyz...") → true ou false
         // O BCrypt nunca decifra o hash — ele gera um novo hash da senha digitada
@@ -129,10 +144,87 @@ public class AuthService {
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
+        return toResponseDTO(usuarioSalvo);
+    }
+
+    // =========================================================================
+    // TROCAR A PROPRIA SENHA
+    // POST-agnostico de cargo — qualquer usuario autenticado pode trocar a
+    // propria senha, sem confirmar a senha atual (decisao do projeto).
+    // =========================================================================
+
+    /**
+     * Troca a senha do usuario atualmente logado.
+     *
+     * @param usuarioLogado — injetado pelo Controller via @AuthenticationPrincipal
+     * @param dto           — a nova senha (em texto puro, sera hasheada aqui)
+     */
+    public void trocarSenha(Usuario usuarioLogado, TrocarSenhaDTO dto) {
+        usuarioLogado.setSenha(passwordEncoder.encode(dto.getNovaSenha()));
+        usuarioRepository.save(usuarioLogado);
+    }
+
+    // =========================================================================
+    // RESETAR SENHA DE OUTRO USUARIO (ADMIN)
+    // Restricao de acesso (hasRole ADMIN) fica no SecurityConfig, nao aqui.
+    // =========================================================================
+
+    public void resetarSenha(Long usuarioId, ResetarSenhaDTO dto) {
+        Usuario usuario = buscarUsuarioOuFalhar(usuarioId);
+        usuario.setSenha(passwordEncoder.encode(dto.getNovaSenha()));
+        usuarioRepository.save(usuario);
+    }
+
+    // =========================================================================
+    // LISTAR USUARIOS ATIVOS (ADMIN)
+    // =========================================================================
+
+    public List<UsuarioResponseDTO> listarAtivos() {
+        return usuarioRepository.findByAtivoTrue()
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    // =========================================================================
+    // DESATIVAR USUARIO (ADMIN) — soft delete, mesmo padrao do Produto
+    // =========================================================================
+
+    /**
+     * Desativa um usuario. A partir daqui, ele nao consegue mais logar nem
+     * usar nenhum token ja emitido (ver Usuario.isEnabled() e JwtAuthFilter).
+     *
+     * @param usuarioId     — quem vai ser desativado
+     * @param usuarioLogado — quem esta pedindo a desativacao (o ADMIN logado)
+     */
+    public void desativar(Long usuarioId, Usuario usuarioLogado) {
+        // Impede um ADMIN de desativar a propria conta — evita ficar
+        // travado de fora do sistema por engano (ainda mais critico se for
+        // o unico ADMIN cadastrado).
+        if (usuarioLogado.getId().equals(usuarioId)) {
+            throw new OperacaoInvalidaException("Voce nao pode desativar a propria conta");
+        }
+
+        Usuario usuario = buscarUsuarioOuFalhar(usuarioId);
+        usuario.setAtivo(false);
+        usuarioRepository.save(usuario);
+    }
+
+    // =========================================================================
+    // METODOS AUXILIARES PRIVADOS
+    // =========================================================================
+
+    private Usuario buscarUsuarioOuFalhar(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario nao encontrado com id: " + id));
+    }
+
+    private UsuarioResponseDTO toResponseDTO(Usuario usuario) {
         return new UsuarioResponseDTO(
-                usuarioSalvo.getId(),
-                usuarioSalvo.getNome(),
-                usuarioSalvo.getEmail(),
-                usuarioSalvo.getCargo());
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getEmail(),
+                usuario.getCargo(),
+                usuario.getAtivo());
     }
 }

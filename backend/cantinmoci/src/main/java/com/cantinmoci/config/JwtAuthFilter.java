@@ -102,8 +102,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
             // Passo 7: Valida o token — verifica se o email bate com o usuario
-            // carregado do banco e se o token nao expirou.
-            if (jwtService.isTokenValido(token, userDetails)) {
+            // carregado do banco, se o token nao expirou, E (Fase 7) se o
+            // usuario ainda esta ativo. Um usuario desativado nao consegue
+            // mais usar NENHUM token seu, mesmo um emitido antes de ser
+            // desativado — sem essa checagem, o token continuaria valido
+            // ate expirar sozinho (ate 24h depois de desativado).
+            if (userDetails.isEnabled() && jwtService.isTokenValido(token, userDetails)) {
 
                 // Passo 8: Cria o objeto de autenticacao do Spring Security.
                 // UsernamePasswordAuthenticationToken representa um usuario autenticado.
