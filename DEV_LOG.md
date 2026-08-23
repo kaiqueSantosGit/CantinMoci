@@ -224,7 +224,7 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 6 — Módulo Eventos ⏳ EM ANDAMENTO
+### Fase 6 — Módulo Eventos ✅ CONCLUÍDA (2026-08-23)
 
 **Decisões de negócio (definidas com o usuário em 2026-08-17, antes de codar):**
 - Estoque **separado por evento** (não é mais só o `Produto.quantidadeEmEstoque` global da Fase 5) — nova entidade `EstoqueEvento`
@@ -233,11 +233,25 @@ Cada funcionalidade segue este fluxo antes de avançar:
 - Relatório **elaborado**: total arrecadado, quantidade de vendas, ticket médio, ranking de produtos mais vendidos
 - Sistema continua **single-tenant** (uma instituição só) — multi-tenant vira [[Fase 9]], só depois do sistema validado em uso real
 
-- [ ] Entidade `Evento` (nome, local, status, datas)
-- [ ] Entidade `EstoqueEvento` (ponte Evento↔Produto com estoque próprio + lock otimista)
-- [ ] Refatorar `VendaService`: estoque passa a ser checado/descontado via `EstoqueEvento`, não mais `Produto` diretamente
-- [ ] `EventoService`/`EventoController`: criar/encerrar evento, alocar estoque, listar produtos do evento, relatório
-- [ ] Testar localmente de ponta a ponta antes de commitar
+- [x] Enum `StatusEvento` (ABERTO, ENCERRADO)
+- [x] Entidade `Evento` (nome, local, status, dataAbertura/dataEncerramento)
+- [x] Entidade `EstoqueEvento` (ponte Evento↔Produto: quantidadeInicial/quantidadeAtual + `@Version`)
+- [x] `Venda` ganha campo `evento` (nullable — vendas de antes da Fase 6 continuam válidas sem evento)
+- [x] Refatorado `VendaService`: estoque agora é checado/descontado via `EstoqueEvento`, não mais `Produto` diretamente; `abrirVenda()` busca o evento `ABERTO` sozinho e recusa se não houver nenhum
+- [x] `EventoService`/`EventoController`: criar (recusa se já existe outro `ABERTO`), encerrar (recusa se há vendas `ABERTA` pendentes), alocar/reforçar estoque, listar produtos do evento, relatório (total, qtd vendas, ticket médio, ranking de produtos mais vendidos)
+- [x] Testado localmente de ponta a ponta — 19 cenários (evento único aberto, estoque por evento, venda vinculada automaticamente, relatório com valores conferidos, encerramento bloqueado por venda aberta, tudo trava depois de encerrado)
+- [x] Roteiros formais `docs/qa/test-eventos.md` (12 testes) e `docs/qa/test-vendas.md` atualizado para o novo fluxo
+
+**Endpoints implementados:**
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | /eventos | Cria e abre um evento (falha se já existe um aberto) |
+| POST | /eventos/{id}/encerrar | Encerra o evento (falha se há vendas abertas) |
+| GET | /eventos | Lista eventos |
+| GET | /eventos/{id} | Consulta um evento |
+| POST | /eventos/{id}/produtos | Aloca (soma) estoque de um produto pro evento |
+| GET | /eventos/{id}/produtos | Lista produtos + estoque disponível no evento |
+| GET | /eventos/{id}/relatorio | Total arrecadado, qtd vendas, ticket médio, produtos mais vendidos |
 
 ---
 

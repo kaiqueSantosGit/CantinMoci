@@ -8,9 +8,16 @@
 
 ## Antes de começar
 
+> ⚠️ **Atualizado na Fase 6:** desde o módulo de Eventos, toda venda exige um
+> **evento ABERTO** — sem isso, `POST /vendas` recusa com 409. O estoque
+> verificado também deixou de ser `Produto.quantidadeEmEstoque` e passou a
+> ser o estoque alocado especificamente para o evento em andamento. Ver
+> `docs/qa/test-eventos.md` para o roteiro completo dessa parte.
+
 1. Faça login (`POST /auth/login`) com um usuário existente e guarde o token — todos os testes abaixo usam `Authorization: Bearer {token}`.
-2. Anote o ID de um produto **ativo** e com estoque > 0 (`GET /produtos`) — os exemplos abaixo usam produto id `2`, preço 4.50, estoque 20.
-3. Se possível, anote também o ID de um produto **desativado** (`ativo: false`) para o Teste 12.
+2. **Abra um evento** (`POST /eventos`) — ver `docs/qa/test-eventos.md` Teste 01.
+3. Anote o ID de um produto **ativo** (`GET /produtos`) e **aloque estoque dele pro evento** (`POST /eventos/{id}/produtos`) — ver `docs/qa/test-eventos.md` Teste 04. Os exemplos abaixo usam produto id `2`, preço 4.50, estoque alocado 20 no evento.
+4. Se possível, anote também o ID de um produto **desativado** (`ativo: false`) para o Teste 12.
 
 ---
 
@@ -54,9 +61,9 @@
 
 **O que valida:** o sistema recusa a quantidade e informa quanto há disponível — o operador pode ajustar e tentar de novo.
 
-**Configuração:** mesmo produto do Teste 02, quantidade muito maior que o estoque (ex: `999`).
+**Configuração:** mesmo produto do Teste 02, quantidade muito maior que o estoque alocado pro evento (ex: `999`).
 
-**Resposta esperada:** `400 Bad Request`, mensagem tipo `"Estoque insuficiente para 'X': disponivel Y, solicitado 999"`.
+**Resposta esperada:** `400 Bad Request`, mensagem tipo `"Estoque insuficiente para 'X' neste evento: disponivel Y, solicitado 999"`.
 
 ---
 
@@ -87,13 +94,13 @@
 
 ---
 
-## TESTE 07 — Consultar o estoque ANTES de finalizar
+## TESTE 07 — Consultar o estoque do evento ANTES de finalizar
 
 **O que valida:** o estoque só é descontado na finalização — montar/ajustar o carrinho não mexe no estoque.
 
-**Configuração:** `GET /produtos/{id}` (o produto usado no Teste 02/04).
+**Configuração:** `GET /eventos/{eventoId}/produtos` (o estoque é do evento, não mais de `/produtos/{id}` — desde a Fase 6).
 
-**Resposta esperada:** `200 OK`, `quantidadeEmEstoque` igual ao valor original (ainda não descontado).
+**Resposta esperada:** `200 OK`, `quantidadeAtual` do produto igual ao valor original (ainda não descontado).
 
 ---
 
@@ -107,9 +114,9 @@
 
 ## TESTE 09 — Confirmar a baixa de estoque
 
-**Configuração:** `GET /produtos/{id}` (mesmo produto do Teste 07).
+**Configuração:** `GET /eventos/{eventoId}/produtos` de novo (mesmo produto do Teste 07).
 
-**Resposta esperada:** `200 OK`, `quantidadeEmEstoque` reduzido exatamente na quantidade vendida.
+**Resposta esperada:** `200 OK`, `quantidadeAtual` reduzido exatamente na quantidade vendida (`quantidadeInicial` não muda — é só o histórico do que foi alocado).
 
 ---
 
@@ -157,7 +164,7 @@
 
 ## Nota sobre concorrência (não coberto por este roteiro manual)
 
-O lock otimista (`@Version` no `Produto`) protege contra duas vendas finalizando ao mesmo tempo e descontando o mesmo estoque de forma inconsistente. Esse cenário exige duas requisições **simultâneas** de verdade — não é possível reproduzir de forma confiável testando manualmente uma requisição de cada vez no Postman. O mecanismo foi validado por revisão de código; um teste automatizado (JUnit, com duas threads) seria a forma correta de cobrir esse caso — fica registrado no [backlog](../backlog.md) como melhoria futura de testes.
+O lock otimista (`@Version`, hoje em `EstoqueEvento` desde a Fase 6 — antes era no `Produto`) protege contra duas vendas finalizando ao mesmo tempo e descontando o mesmo estoque de forma inconsistente. Esse cenário exige duas requisições **simultâneas** de verdade — não é possível reproduzir de forma confiável testando manualmente uma requisição de cada vez no Postman. O mecanismo foi validado por revisão de código; um teste automatizado (JUnit, com duas threads) seria a forma correta de cobrir esse caso — fica registrado no [backlog](../backlog.md) como melhoria futura de testes.
 
 ---
 
@@ -171,9 +178,9 @@ O lock otimista (`@Version` no `Produto`) protege contra duas vendas finalizando
 | 04 | PUT | /vendas/{id}/itens/{itemId} | 200 OK | Ajustar quantidade |
 | 05 | POST | /vendas/{id}/itens | 201 Created | Adicionar segundo item |
 | 06 | DELETE | /vendas/{id}/itens/{itemId} | 200 OK | Remover item |
-| 07 | GET | /produtos/{id} | 200 OK | Estoque intacto antes de finalizar |
+| 07 | GET | /eventos/{id}/produtos | 200 OK | Estoque do evento intacto antes de finalizar |
 | 08 | POST | /vendas/{id}/finalizar | 200 OK | Finalizar venda |
-| 09 | GET | /produtos/{id} | 200 OK | Estoque descontado |
+| 09 | GET | /eventos/{id}/produtos | 200 OK | Estoque do evento descontado |
 | 10 | POST | /vendas/{id}/itens | 409 Conflict | Alterar venda finalizada |
 | 11 | POST | /vendas/{id}/finalizar | 409 Conflict | Finalizar de novo |
 | 12 | POST | /vendas/{id}/itens | 409 Conflict | Vender produto desativado |
@@ -204,6 +211,7 @@ O lock otimista (`@Version` no `Produto`) protege contra duas vendas finalizando
 | `id` | number | Identificador da venda |
 | `status` | string | `ABERTA` ou `FINALIZADA` |
 | `usuarioId` / `nomeUsuario` | number / string | Operador que abriu a venda |
+| `eventoId` / `nomeEvento` | number / string | Evento vinculado (Fase 6) — nulo em vendas criadas antes da Fase 6 |
 | `itens` | array | Lista de `ItemVendaResponseDTO` |
 | `valorTotal` | number | Soma dos subtotais |
 | `dataAbertura` / `dataFinalizacao` | datetime | Timestamps |

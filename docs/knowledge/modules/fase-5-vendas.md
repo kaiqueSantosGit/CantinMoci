@@ -54,6 +54,10 @@ Status: ✅ Concluída (2026-08-17) — testada localmente, 14 cenários
 
 `ddl-auto=update` tentou `ALTER TABLE produtos ADD COLUMN version bigint NOT NULL` sem valor padrão, o que falha em qualquer tabela com linhas já existentes (aconteceu no banco local, que já tinha produtos da Fase 2). Corrigido com uma migração manual (`ALTER TABLE ... ADD COLUMN version bigint NOT NULL DEFAULT 0`) antes de subir a aplicação. Produção (Neon) não foi afetada porque `produtos` lá ainda estava vazia — mas fica registrado como cuidado para a próxima coluna `NOT NULL` adicionada a uma tabela com dados.
 
+## Atualização (Fase 6)
+
+O `VendaService` descrito acima foi **refatorado** na Fase 6: a validação e o desconto de estoque, que aqui liam/escreviam direto em `Produto.quantidadeEmEstoque`, passaram a usar a nova entidade `EstoqueEvento` (estoque por evento). `abrirVenda()` também passou a exigir um evento `ABERTO` em andamento. Ver [[fase-6-eventos]] para o desenho atual — este documento fica como registro histórico do desenho original da Fase 5.
+
 ## Relacionado
 
 - [[fase-2-produto]]

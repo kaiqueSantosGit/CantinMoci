@@ -19,11 +19,11 @@
 - [[fase-2-produto]] ✅ — CRUD completo de Produto (10 testes Postman validados)
 - [[fase-3-auth]] ✅ — autenticação JWT completa: login, cadastro (restrito a ADMIN), 401 correto, testada em produção
 - [[fase-4-deploy]] ✅ — no ar em https://cantinmoci.onrender.com (Render + Neon)
-- [[fase-5-vendas]] ✅ — carrinho persistido, baixa de estoque, lock otimista, 14 cenários testados
+- [[fase-5-vendas]] ✅ — carrinho persistido, baixa de estoque, lock otimista, 14 cenários testados (refatorado na Fase 6)
+- [[fase-6-eventos]] ✅ — estoque por evento, 1 evento aberto por vez, relatório elaborado, 19 cenários testados
 
 ## Módulos futuros
-- [[fase-6-eventos]] 🚧 — em andamento: estoque por evento, relatório elaborado
-- [[fase-7-usuarios]] — trocar senha, listar/desativar usuário, admin resetar senha
+- [[fase-7-usuarios]] ⏳ — trocar senha, listar/desativar usuário, admin resetar senha (próxima etapa)
 - [[fase-8-frontend]] — interface web (requer configurar CORS)
 - [[fase-9-multi-tenant]] 📋 — várias instituições isoladas, planejada para depois do sistema validado em uso real
 
