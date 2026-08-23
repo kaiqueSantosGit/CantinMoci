@@ -45,7 +45,14 @@ Antes de qualquer código, um protótipo navegável (HTML/CSS/JS puro, publicado
 - `src/pages/Produtos.jsx` — **funcional de ponta a ponta**: listar (`GET /produtos`), criar/editar via `src/components/ProdutoFormModal.jsx` (`POST`/`PUT`), desativar com confirmação (`DELETE`). Testado no navegador (criar e editar validados via automação; desativar — que abre `confirm()` nativo, não automatizável pela ferramenta de navegador — validado via `curl` direto no endpoint)
 - `src/pages/Eventos.jsx` + `src/pages/EventoDetalhe.jsx` — **funcional de ponta a ponta**: lista de eventos, criar (`src/components/EventoFormModal.jsx`), detalhe com estoque alocado (alocar/reforçar via formulário inline), encerrar, e relatório (total, qtd vendas, ticket médio, mais vendidos). Testado no navegador: regra de "1 evento aberto por vez" mostrando a mensagem do backend corretamente, alocação de estoque, relatório com valores conferidos contra os testes da Fase 6
 - **`src/components/ConfirmDialog.jsx`** (novo) — modal de confirmação próprio do app, substituindo `window.confirm()` nativo em "desativar produto" e "encerrar evento". Bug real encontrado pelo usuário: depois de várias caixas `confirm()` seguidas, o Chrome oferece "impedir esta página de criar mais diálogos" — se marcado, todo `confirm()` seguinte é cancelado sozinho, sem sequer aparecer. Corrigido eliminando a dependência de diálogos nativos
-- Demais páginas (Dashboard, Vendas, Usuarios) — placeholders "em construção" por enquanto, uma tela de cada vez nas próximas etapas
+- `src/pages/Vendas.jsx` (PDV) — **funcional de ponta a ponta**, a tela mais rica:
+  - Descobre o evento `ABERTO` sozinho e reaproveita o carrinho `ABERTA` já existente do operador logado (via `usuarioId` + `eventoId`), em vez de abrir um carrinho novo a cada recarregamento de página
+  - Grade de produtos mostra "disponível" já descontando o que está no carrinho local (`quantidadeAtual - somaNoCarrinho`), dando feedback antes mesmo de bater no backend
+  - Clicar num produto já presente no carrinho soma na mesma linha (`PUT`) em vez de criar uma linha duplicada (`POST`)
+  - Erros de estoque insuficiente (400 do backend) aparecem no carrinho sem corromper o estado local
+  - Finalizar mostra mensagem de sucesso, atualiza o estoque exibido e já abre um carrinho novo automaticamente
+  - Testado no navegador: adicionar, ajustar quantidade (+/−), remover, bloqueio por estoque esgotado (card desabilitado), erro de estoque insuficiente no meio do carrinho, finalizar — com o relatório do evento (tela de Eventos) conferido batendo com o resultado
+- Demais páginas (Dashboard, Usuarios) — placeholders "em construção" por enquanto
 
 ## Decisão de armazenamento do token
 
