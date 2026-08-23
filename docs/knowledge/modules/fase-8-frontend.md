@@ -42,7 +42,8 @@ Antes de qualquer código, um protótipo navegável (HTML/CSS/JS puro, publicado
 - `src/components/ProtectedRoute.jsx` — sem sessão válida, redireciona pro login
 - `src/layouts/AppShell.jsx` — menu lateral + barra superior; item "Usuários" só aparece pra ADMIN
 - `src/pages/Login.jsx` — **funcional de ponta a ponta**, testada no navegador real (CORS, login, `GET /auth/me`, logout, proteção de rota, tema escuro)
-- Demais páginas (Dashboard, Vendas, Eventos, Produtos, Usuarios) — placeholders "em construção" por enquanto, uma tela de cada vez nas próximas etapas
+- `src/pages/Produtos.jsx` — **funcional de ponta a ponta**: listar (`GET /produtos`), criar/editar via `src/components/ProdutoFormModal.jsx` (`POST`/`PUT`), desativar com confirmação (`DELETE`). Testado no navegador (criar e editar validados via automação; desativar — que abre `confirm()` nativo, não automatizável pela ferramenta de navegador — validado via `curl` direto no endpoint)
+- Demais páginas (Dashboard, Vendas, Eventos, Usuarios) — placeholders "em construção" por enquanto, uma tela de cada vez nas próximas etapas
 
 ## Decisão de armazenamento do token
 

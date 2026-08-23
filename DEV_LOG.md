@@ -310,7 +310,13 @@ Cada funcionalidade segue este fluxo antes de avançar:
 - [x] Rotas protegidas (`ProtectedRoute`) — sem sessão válida, redireciona pro login
 - [x] `AppShell` — menu lateral + barra superior, item "Usuários" só aparece pra ADMIN
 - [x] **Tela de Login funcional de ponta a ponta** — testada no navegador (login real, `GET /auth/me`, logout, proteção de rota, tema escuro)
-- [ ] Telas dos módulos (Dashboard, Vendas, Eventos, Produtos, Usuários) — hoje são placeholders "em construção", serão construídas uma de cada vez nas próximas etapas
+
+**Telas dos módulos (uma de cada vez):**
+- [x] **Produtos** — listar, criar, editar e desativar (soft delete), testado no navegador de ponta a ponta (a desativação, que abre um `confirm()` nativo do navegador, foi validada via `curl` — a ferramenta de automação do navegador não consegue confirmar diálogos nativos)
+- [ ] Dashboard
+- [ ] Eventos
+- [ ] Vendas (PDV)
+- [ ] Usuários
 - [ ] Deploy (Vercel/Netlify)
 
 ---
