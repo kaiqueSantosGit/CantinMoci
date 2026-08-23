@@ -22,9 +22,10 @@
 - [[fase-5-vendas]] ✅ — carrinho persistido, baixa de estoque, lock otimista, 14 cenários testados
 
 ## Módulos futuros
-- [[fase-6-eventos]] ⏳ — gestão de eventos, próxima etapa
+- [[fase-6-eventos]] 🚧 — em andamento: estoque por evento, relatório elaborado
 - [[fase-7-usuarios]] — trocar senha, listar/desativar usuário, admin resetar senha
 - [[fase-8-frontend]] — interface web (requer configurar CORS)
+- [[fase-9-multi-tenant]] 📋 — várias instituições isoladas, planejada para depois do sistema validado em uso real
 
 ## Backlog (pós-lançamento real)
 - [[backlog]] — melhorias mapeadas mas não bloqueantes: rate limiting, revogação de token, auditoria, paginação, backup, monitoramento
@@ -35,6 +36,7 @@
 - [[stack]] — por que Java 21, Spring Boot, PostgreSQL
 - [[arquitetura]] — estrutura em camadas do backend
 - [[deploy]] — por que Render + Neon, sem custo
+- [[multi-tenant]] 📋 — plano futuro para várias instituições isoladas (adiado até validação real)
 
 ## Conceitos aprendidos
 - [[JPA]] — mapeamento objeto-relacional

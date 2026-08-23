@@ -224,11 +224,20 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 6 — Módulo Eventos ⏳ NÃO INICIADA
+### Fase 6 — Módulo Eventos ⏳ EM ANDAMENTO
 
-- [ ] Entidade Evento
-- [ ] Isolamento de produtos e vendas por evento
-- [ ] Relatórios por evento
+**Decisões de negócio (definidas com o usuário em 2026-08-17, antes de codar):**
+- Estoque **separado por evento** (não é mais só o `Produto.quantidadeEmEstoque` global da Fase 5) — nova entidade `EstoqueEvento`
+- Vendas passam a exigir um evento em andamento — sem evento aberto, não dá pra abrir venda
+- **1 evento `ABERTO` por vez**, vínculo automático: a venda nova já nasce vinculada ao evento aberto, sem o operador escolher
+- Relatório **elaborado**: total arrecadado, quantidade de vendas, ticket médio, ranking de produtos mais vendidos
+- Sistema continua **single-tenant** (uma instituição só) — multi-tenant vira [[Fase 9]], só depois do sistema validado em uso real
+
+- [ ] Entidade `Evento` (nome, local, status, datas)
+- [ ] Entidade `EstoqueEvento` (ponte Evento↔Produto com estoque próprio + lock otimista)
+- [ ] Refatorar `VendaService`: estoque passa a ser checado/descontado via `EstoqueEvento`, não mais `Produto` diretamente
+- [ ] `EventoService`/`EventoController`: criar/encerrar evento, alocar estoque, listar produtos do evento, relatório
+- [ ] Testar localmente de ponta a ponta antes de commitar
 
 ---
 
@@ -248,6 +257,29 @@ Cada funcionalidade segue este fluxo antes de avançar:
 - [ ] Definir tecnologia
 - [ ] Telas principais
 - [ ] **Configurar CORS no backend** (mapeado em 2026-08-17) — o `SecurityConfig` hoje não libera nenhuma origem além do próprio backend; o frontend só vai conseguir chamar a API depois de configurar `CorsConfigurationSource` com o domínio do frontend
+
+---
+
+### Fase 9 — Multi-tenant / Organizações ⏳ FUTURA (planejada, não iniciada)
+
+**Mapeada em 2026-08-17**, durante o planejamento da Fase 6. Objetivo: permitir que **várias instituições diferentes** usem a mesma instalação do sistema — cada uma com login próprio, e produtos/eventos/vendas completamente isolados das outras (a conta de uma instituição nunca vê nem interfere nos dados de outra).
+
+**Quando priorizar:** só depois que o sistema de uma instituição só (o que estamos construindo agora) estiver **validado em uso real** — em eventos de verdade, não só em testes. Evita empilhar dois refactors grandes ao mesmo tempo e evita mexer em módulos já testados sem necessidade comprovada. Ver decisão completa em `docs/knowledge/decisions/multi-tenant.md`.
+
+**Mudanças de arquitetura previstas:**
+- [ ] Nova entidade `Organizacao`
+- [ ] `Usuario`, `Produto`, `Evento` ganham `organizacaoId`
+- [ ] Regra "1 evento aberto por vez" passa a ser por organização, não global
+- [ ] Toda consulta (Produto, Evento, Venda) passa a filtrar pela organização do usuário logado
+- [ ] Proteção contra vazamento entre contas (IDOR): busca por ID confere se o recurso pertence à organização de quem pede; se não pertence, retorna 404 (nunca 403 — não confirma que o recurso existe em outra conta)
+- [ ] Novo endpoint público `POST /organizacoes` — cria uma organização nova + seu primeiro usuário ADMIN (hoje `/auth/register` exige um ADMIN pré-existente, o que não funciona pra uma instituição nova sem nenhum usuário ainda)
+- [ ] Migração dos dados já existentes em produção (usuário, produtos, vendas de hoje) para uma organização "padrão/legado"
+
+**Escala esperada:** dezenas de acessos simultâneos (20-100), não milhares — não exige infraestrutura mais robusta que a atual (Render + Neon free tier já comportam esse volume, mesmo com várias instituições).
+
+**Custo:** continua zero — multi-tenant é decisão de modelagem de dados, não de infraestrutura.
+
+**Caminho para escalar de verdade no futuro (pago), se um dia necessário:** a configuração via variável de ambiente e o `Dockerfile` (Fase 4) já deixam a troca para planos pagos (Neon/Render maiores, ou outro provedor) uma questão só de configuração — sem reescrever código. Multi-tenant bem feito agora facilita esse caminho, não atrapalha.
 
 ---
 
