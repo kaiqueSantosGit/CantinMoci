@@ -148,6 +148,16 @@ public class AuthService {
     }
 
     // =========================================================================
+    // PERFIL DO USUARIO LOGADO (Fase 8 — Frontend)
+    // O login (POST /auth/login) devolve so o token — o frontend precisa
+    // desta rota pra saber quem esta logado (nome, cargo) e montar a tela.
+    // =========================================================================
+
+    public UsuarioResponseDTO obterPerfil(Usuario usuarioLogado) {
+        return toResponseDTO(usuarioLogado);
+    }
+
+    // =========================================================================
     // TROCAR A PROPRIA SENHA
     // POST-agnostico de cargo — qualquer usuario autenticado pode trocar a
     // propria senha, sem confirmar a senha atual (decisao do projeto).

@@ -1,6 +1,7 @@
 package com.cantinmoci.config;
 
 import com.cantinmoci.service.UserDetailsServiceImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +16,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 /**
  * Configuracao central do Spring Security.
@@ -44,6 +50,22 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
     }
+
+    /**
+     * Origens (dominios) autorizadas a chamar esta API a partir do navegador
+     * (Fase 8 — Frontend).
+     *
+     * Lida da variavel de ambiente CORS_ALLOWED_ORIGINS (lista separada por
+     * virgula), com fallback para o endereco padrao do Vite em desenvolvimento
+     * local (http://localhost:5173). Em producao, configuramos essa variavel
+     * no Render com o dominio real do frontend publicado (ex: Vercel).
+     *
+     * @Value — o Spring le essa propriedade do application.properties (que,
+     * por sua vez, le da variavel de ambiente), o mesmo padrao ja usado para
+     * DATABASE_URL, JWT_SECRET etc. desde a Fase 4.
+     */
+    @Value("${cors.allowed-origins}")
+    private String corsAllowedOrigins;
 
     // =========================================================================
     // BEAN: SecurityFilterChain
@@ -79,6 +101,15 @@ public class SecurityConfig {
             // APIs REST stateless NAO usam cookies de sessao, entao CSRF nao se aplica.
             // Desabilitamos para simplificar o uso com Postman e clientes REST.
             .csrf(AbstractHttpConfigurer::disable)
+
+            // CORS (Cross-Origin Resource Sharing) — Fase 8. Sem isso, o
+            // NAVEGADOR bloqueia sozinho qualquer chamada do frontend
+            // (rodando numa origem, ex: localhost:5173) pra esta API
+            // (rodando em outra origem, ex: localhost:8080) — mesmo que a
+            // API responda normalmente, o navegador descarta a resposta.
+            // Ferramentas como Postman/curl NUNCA foram afetadas por isso —
+            // CORS e uma regra do navegador, nao da API.
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
             // Configuracao de autorizacao por rota
             .authorizeHttpRequests(auth -> auth
@@ -136,6 +167,37 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    // =========================================================================
+    // BEAN: CorsConfigurationSource
+    // Define quem pode chamar a API a partir de um navegador, e como.
+    // =========================================================================
+
+    /**
+     * Configura o CORS da aplicacao.
+     *
+     * allowedOrigins  — quais dominios podem chamar a API (lista vinda de
+     *                   corsAllowedOrigins, configurada acima).
+     * allowedMethods  — quais verbos HTTP sao aceitos entre origens diferentes.
+     * allowedHeaders  — quais headers o navegador pode mandar. "*" libera todos
+     *                   (inclui o header "Authorization" que carrega o token JWT).
+     * allowCredentials — false: nao usamos cookies de sessao (API stateless,
+     *                   o token vai no header, nao em cookie), entao nao
+     *                   precisamos de credenciais entre origens.
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of(corsAllowedOrigins.split(",")));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(false);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Aplica essa configuracao a TODAS as rotas da API ("/**").
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     // =========================================================================

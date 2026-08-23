@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -99,6 +100,19 @@ public class AuthController {
     public ResponseEntity<UsuarioResponseDTO> register(@RequestBody @Valid RegisterRequestDTO dto) {
         UsuarioResponseDTO resposta = authService.cadastrar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
+    }
+
+    // =========================================================================
+    // GET /auth/me
+    // Devolve os dados do usuario logado (nome, email, cargo). O login
+    // (POST /auth/login) devolve so o token — o frontend chama esta rota
+    // logo depois de logar (ou ao recarregar a pagina com um token salvo)
+    // pra saber quem esta autenticado.
+    // =========================================================================
+
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioResponseDTO> me(@AuthenticationPrincipal Usuario usuarioLogado) {
+        return ResponseEntity.ok(authService.obterPerfil(usuarioLogado));
     }
 
     // =========================================================================
