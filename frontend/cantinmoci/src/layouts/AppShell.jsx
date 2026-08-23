@@ -1,5 +1,13 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+
+const TITULOS_POR_ROTA = {
+  '/': 'Painel',
+  '/vendas': 'Vendas',
+  '/eventos': 'Eventos',
+  '/produtos': 'Produtos',
+  '/usuarios': 'Usuários',
+}
 
 const ITENS_NAV = [
   {
@@ -70,6 +78,8 @@ function Icone({ children }) {
 
 export default function AppShell() {
   const { usuario, logout } = useAuth()
+  const location = useLocation()
+  const titulo = TITULOS_POR_ROTA[location.pathname] ?? 'CantinMoci'
   const iniciais = usuario?.nome
     ?.split(' ')
     .map((p) => p[0])
@@ -139,7 +149,7 @@ export default function AppShell() {
 
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="h-[60px] shrink-0 flex items-center justify-between px-6" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)' }}>
-          <h2 className="text-base font-semibold">CantinMoci</h2>
+          <h2 className="text-base font-semibold">{titulo}</h2>
         </div>
         <div className="p-6 overflow-x-auto">
           <Outlet />
