@@ -314,6 +314,7 @@ Cada funcionalidade segue este fluxo antes de avançar:
 **Telas dos módulos (uma de cada vez):**
 - [x] **Produtos** — listar, criar, editar e desativar (soft delete), testado no navegador de ponta a ponta (a desativação, que abre um `confirm()` nativo do navegador, foi validada via `curl` — a ferramenta de automação do navegador não consegue confirmar diálogos nativos)
 - [x] **Eventos** — lista (`/eventos`) + detalhe (`/eventos/:id`) com estoque alocado, alocar/reforçar estoque, encerrar e relatório. Testado no navegador de ponta a ponta: criar evento, regra de "1 evento aberto por vez" (mensagem do backend aparecendo certinho), alocar estoque, relatório com valores batendo com os testes da Fase 6
+- [x] **Bug corrigido:** `window.confirm()` nativo (usado em "desativar produto" e "encerrar evento") parava de funcionar depois de algumas confirmações seguidas — o Chrome oferece "impedir esta página de criar mais diálogos" e, se marcado, cancela todo `confirm()` seguinte sem nem mostrar a caixa. Reportado pelo usuário ("não consigo encerrar o evento"). Corrigido com `ConfirmDialog`, um modal de confirmação próprio do app
 - [ ] Dashboard
 - [ ] Vendas (PDV)
 - [ ] Usuários

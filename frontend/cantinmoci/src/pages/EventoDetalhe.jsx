@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { buscarEvento, listarProdutosDoEvento, alocarEstoque, encerrarEvento, obterRelatorio } from '../api/eventos'
 import { listarProdutos } from '../api/produtos'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 function moeda(valor) {
   return 'R$ ' + Number(valor).toFixed(2).replace('.', ',')
@@ -22,6 +23,7 @@ export default function EventoDetalhe() {
   const [quantidadeAlocar, setQuantidadeAlocar] = useState('')
   const [alocando, setAlocando] = useState(false)
   const [erroAlocar, setErroAlocar] = useState('')
+  const [confirmandoEncerrar, setConfirmandoEncerrar] = useState(false)
 
   async function carregar() {
     setCarregando(true)
@@ -75,10 +77,8 @@ export default function EventoDetalhe() {
     }
   }
 
-  async function handleEncerrar() {
-    const confirmou = window.confirm('Encerrar este evento? Não aceita mais vendas nem alocação de estoque depois disso.')
-    if (!confirmou) return
-
+  async function confirmarEncerrar() {
+    setConfirmandoEncerrar(false)
     try {
       await encerrarEvento(id)
       carregar()
@@ -118,7 +118,7 @@ export default function EventoDetalhe() {
         </div>
         {aberto && (
           <button
-            onClick={handleEncerrar}
+            onClick={() => setConfirmandoEncerrar(true)}
             className="h-9 px-3.5 rounded-lg text-[13px] font-bold shrink-0"
             style={{ background: 'var(--danger-tint)', color: 'var(--danger)' }}
           >
@@ -231,6 +231,17 @@ export default function EventoDetalhe() {
           )}
         </div>
       </div>
+
+      {confirmandoEncerrar && (
+        <ConfirmDialog
+          titulo="Encerrar evento"
+          mensagem="Não aceita mais vendas nem alocação de estoque depois disso. O histórico e o relatório continuam disponíveis."
+          textoConfirmar="Encerrar"
+          perigoso
+          onCancelar={() => setConfirmandoEncerrar(false)}
+          onConfirmar={confirmarEncerrar}
+        />
+      )}
     </div>
   )
 }

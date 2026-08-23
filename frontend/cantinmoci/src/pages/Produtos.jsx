@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { listarProdutos, desativarProduto } from '../api/produtos'
 import ProdutoFormModal from '../components/ProdutoFormModal'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 export default function Produtos() {
   const [produtos, setProdutos] = useState([])
@@ -9,6 +10,9 @@ export default function Produtos() {
 
   // null = modal fechado. 'novo' = criando. um objeto produto = editando.
   const [modal, setModal] = useState(null)
+
+  // Produto aguardando confirmação de desativação (null = nenhum).
+  const [paraDesativar, setParaDesativar] = useState(null)
 
   async function carregar() {
     setCarregando(true)
@@ -27,10 +31,9 @@ export default function Produtos() {
     carregar()
   }, [])
 
-  async function handleDesativar(produto) {
-    const confirmou = window.confirm(`Desativar "${produto.nome}"? Ele deixa de aparecer nas vendas, mas o histórico é preservado.`)
-    if (!confirmou) return
-
+  async function confirmarDesativar() {
+    const produto = paraDesativar
+    setParaDesativar(null)
     try {
       await desativarProduto(produto.id)
       carregar()
@@ -107,7 +110,7 @@ export default function Produtos() {
                     <button onClick={() => setModal(produto)} className="text-[12.5px] font-semibold mr-3" style={{ color: 'var(--brand-strong)' }}>
                       Editar
                     </button>
-                    <button onClick={() => handleDesativar(produto)} className="text-[12.5px] font-semibold" style={{ color: 'var(--danger)' }}>
+                    <button onClick={() => setParaDesativar(produto)} className="text-[12.5px] font-semibold" style={{ color: 'var(--danger)' }}>
                       Desativar
                     </button>
                   </td>
@@ -123,6 +126,17 @@ export default function Produtos() {
           produto={modal === 'novo' ? null : modal}
           onFechar={fecharModal}
           onSalvo={handleSalvo}
+        />
+      )}
+
+      {paraDesativar && (
+        <ConfirmDialog
+          titulo="Desativar produto"
+          mensagem={`Desativar "${paraDesativar.nome}"? Ele deixa de aparecer nas vendas, mas o histórico é preservado.`}
+          textoConfirmar="Desativar"
+          perigoso
+          onCancelar={() => setParaDesativar(null)}
+          onConfirmar={confirmarDesativar}
         />
       )}
     </div>
