@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { trocarMinhaSenha } from '../api/usuarios'
+import SenhaModal from '../components/SenhaModal'
 
 const TITULOS_POR_ROTA = {
   '/': 'Painel',
@@ -79,6 +82,7 @@ function Icone({ children }) {
 export default function AppShell() {
   const { usuario, logout } = useAuth()
   const location = useLocation()
+  const [modalSenha, setModalSenha] = useState(false)
   const titulo =
     TITULOS_POR_ROTA[location.pathname] ??
     (location.pathname.startsWith('/eventos/') ? 'Eventos' : 'CantinMoci')
@@ -88,6 +92,11 @@ export default function AppShell() {
     .slice(0, 2)
     .join('')
     .toUpperCase()
+
+  async function handleTrocarSenha(novaSenha) {
+    await trocarMinhaSenha({ novaSenha })
+    setModalSenha(false)
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -128,26 +137,45 @@ export default function AppShell() {
           ))}
         </nav>
 
-        <div className="mt-auto flex items-center gap-2.5 pt-[14px]" style={{ borderTop: '1px solid var(--line)' }}>
-          <span
-            className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-            style={{ background: 'var(--accent-tint)', color: 'var(--accent)' }}
-          >
-            {iniciais}
-          </span>
-          <span className="min-w-0">
-            <strong className="block text-[12.5px] truncate">{usuario?.nome}</strong>
-            <span className="block text-[11px]" style={{ color: 'var(--ink-faint)' }}>{usuario?.cargo}</span>
-          </span>
-          <button
-            onClick={logout}
-            className="ml-auto text-[11px] font-semibold shrink-0"
-            style={{ color: 'var(--ink-faint)' }}
-          >
-            Sair
-          </button>
+        <div className="mt-auto pt-[14px]" style={{ borderTop: '1px solid var(--line)' }}>
+          <div className="flex items-center gap-2.5">
+            <span
+              className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+              style={{ background: 'var(--accent-tint)', color: 'var(--accent)' }}
+            >
+              {iniciais}
+            </span>
+            <span className="min-w-0">
+              <strong className="block text-[12.5px] truncate">{usuario?.nome}</strong>
+              <span className="block text-[11px]" style={{ color: 'var(--ink-faint)' }}>{usuario?.cargo}</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-3 mt-2.5 pl-[2px]">
+            <button
+              onClick={() => setModalSenha(true)}
+              className="text-[11px] font-semibold"
+              style={{ color: 'var(--ink-faint)' }}
+            >
+              Trocar senha
+            </button>
+            <button
+              onClick={logout}
+              className="text-[11px] font-semibold"
+              style={{ color: 'var(--ink-faint)' }}
+            >
+              Sair
+            </button>
+          </div>
         </div>
       </aside>
+
+      {modalSenha && (
+        <SenhaModal
+          titulo="Trocar minha senha"
+          onFechar={() => setModalSenha(false)}
+          onSalvar={handleTrocarSenha}
+        />
+      )}
 
       <div className="flex-1 min-w-0 flex flex-col">
         <div className="h-[60px] shrink-0 flex items-center justify-between px-6" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)' }}>
