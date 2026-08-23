@@ -1,5 +1,6 @@
 package com.cantinmoci.repository;
 
+import com.cantinmoci.model.Evento;
 import com.cantinmoci.model.StatusVenda;
 import com.cantinmoci.model.Venda;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,4 +25,13 @@ public interface VendaRepository extends JpaRepository<Venda, Long> {
      * para consultar so o historico de vendas fechadas.
      */
     List<Venda> findByStatus(StatusVenda status);
+
+    /**
+     * Usado pelo EventoService: encontrar vendas de um evento especifico
+     * com um status especifico. Dois usos:
+     *   - gerar relatorio: vendas FINALIZADAS de um evento
+     *   - validar encerramento: existem vendas ABERTA (carrinho em
+     *     andamento) neste evento? Se sim, nao deveria encerrar ainda.
+     */
+    List<Venda> findByEventoAndStatus(Evento evento, StatusVenda status);
 }

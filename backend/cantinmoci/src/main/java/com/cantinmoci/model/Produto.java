@@ -102,6 +102,12 @@ public class Produto {
      *
      * Nao precisamos ler nem escrever este campo manualmente em nenhum lugar
      * do codigo — o Hibernate cuida de tudo sozinho.
+     *
+     * Nota (Fase 6): a partir do modulo de Eventos, o desconto de estoque
+     * das vendas passou a acontecer em EstoqueEvento (estoque por evento),
+     * nao mais aqui em Produto.quantidadeEmEstoque. Este campo @Version
+     * continua existindo (nao faz mal) mas nao e mais usado pelo fluxo de
+     * vendas — o lock otimista relevante agora e o de EstoqueEvento.
      */
     @Version
     @Column(nullable = false)

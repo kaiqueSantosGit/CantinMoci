@@ -20,18 +20,24 @@ public class VendaResponseDTO {
     private String status;
     private Long usuarioId;
     private String nomeUsuario;
+    // Nulos para vendas antigas (criadas antes da Fase 6, sem evento vinculado).
+    private Long eventoId;
+    private String nomeEvento;
     private List<ItemVendaResponseDTO> itens;
     private BigDecimal valorTotal;
     private LocalDateTime dataAbertura;
     private LocalDateTime dataFinalizacao;
 
     public VendaResponseDTO(Long id, String status, Long usuarioId, String nomeUsuario,
+                             Long eventoId, String nomeEvento,
                              List<ItemVendaResponseDTO> itens, BigDecimal valorTotal,
                              LocalDateTime dataAbertura, LocalDateTime dataFinalizacao) {
         this.id = id;
         this.status = status;
         this.usuarioId = usuarioId;
         this.nomeUsuario = nomeUsuario;
+        this.eventoId = eventoId;
+        this.nomeEvento = nomeEvento;
         this.itens = itens;
         this.valorTotal = valorTotal;
         this.dataAbertura = dataAbertura;
@@ -52,6 +58,14 @@ public class VendaResponseDTO {
 
     public String getNomeUsuario() {
         return nomeUsuario;
+    }
+
+    public Long getEventoId() {
+        return eventoId;
+    }
+
+    public String getNomeEvento() {
+        return nomeEvento;
     }
 
     public List<ItemVendaResponseDTO> getItens() {

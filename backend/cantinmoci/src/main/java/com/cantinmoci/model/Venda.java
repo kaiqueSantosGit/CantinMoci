@@ -58,6 +58,18 @@ public class Venda {
     private Usuario usuario;
 
     /**
+     * O evento ao qual esta venda pertence (Fase 6).
+     *
+     * nullable = true (padrao) de proposito: vendas criadas ANTES da Fase 6
+     * nao tinham evento nenhum, e continuam validas no banco sem um. Vendas
+     * novas, porem, sempre recebem um evento — o VendaService recusa abrir
+     * uma venda se nao houver nenhum evento ABERTO no momento.
+     */
+    @ManyToOne
+    @JoinColumn(name = "evento_id")
+    private Evento evento;
+
+    /**
      * Soma de (precoUnitario * quantidade) de todos os itens.
      * Recalculado pelo Service toda vez que um item e adicionado, alterado
      * ou removido — assim o cliente sempre ve o total atualizado sem
@@ -116,6 +128,14 @@ public class Venda {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public Evento getEvento() {
+        return evento;
+    }
+
+    public void setEvento(Evento evento) {
+        this.evento = evento;
     }
 
     public BigDecimal getValorTotal() {

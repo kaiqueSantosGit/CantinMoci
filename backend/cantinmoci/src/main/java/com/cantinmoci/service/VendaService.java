@@ -8,11 +8,16 @@ import com.cantinmoci.exception.EstoqueInsuficienteException;
 import com.cantinmoci.exception.OperacaoInvalidaException;
 import com.cantinmoci.exception.ResourceNotFoundException;
 import com.cantinmoci.exception.VendaConcorrenteException;
+import com.cantinmoci.model.Evento;
+import com.cantinmoci.model.EstoqueEvento;
 import com.cantinmoci.model.ItemVenda;
 import com.cantinmoci.model.Produto;
+import com.cantinmoci.model.StatusEvento;
 import com.cantinmoci.model.StatusVenda;
 import com.cantinmoci.model.Usuario;
 import com.cantinmoci.model.Venda;
+import com.cantinmoci.repository.EstoqueEventoRepository;
+import com.cantinmoci.repository.EventoRepository;
 import com.cantinmoci.repository.ProdutoRepository;
 import com.cantinmoci.repository.VendaRepository;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -40,15 +45,21 @@ public class VendaService {
 
     private final VendaRepository vendaRepository;
     private final ProdutoRepository produtoRepository;
+    private final EventoRepository eventoRepository;
+    private final EstoqueEventoRepository estoqueEventoRepository;
 
-    public VendaService(VendaRepository vendaRepository, ProdutoRepository produtoRepository) {
+    public VendaService(VendaRepository vendaRepository, ProdutoRepository produtoRepository,
+                         EventoRepository eventoRepository, EstoqueEventoRepository estoqueEventoRepository) {
         this.vendaRepository = vendaRepository;
         this.produtoRepository = produtoRepository;
+        this.eventoRepository = eventoRepository;
+        this.estoqueEventoRepository = estoqueEventoRepository;
     }
 
     // =========================================================================
     // ABRIR VENDA
-    // Cria um carrinho novo (status ABERTA), vinculado ao operador logado.
+    // Cria um carrinho novo (status ABERTA), vinculado ao operador logado
+    // E ao evento ABERTO no momento (Fase 6).
     // =========================================================================
 
     /**
@@ -56,10 +67,19 @@ public class VendaService {
      *
      * @param usuarioLogado — o operador autenticado, injetado pelo Controller
      *                        a partir do token JWT (nunca informado pelo cliente).
+     *
+     * A partir da Fase 6, toda venda precisa de um evento em andamento —
+     * o metodo busca sozinho qual e o evento ABERTO (so pode existir um) e
+     * vincula a venda a ele. O operador nao escolhe o evento manualmente.
      */
     public VendaResponseDTO abrirVenda(Usuario usuarioLogado) {
+        Evento eventoAberto = eventoRepository.findFirstByStatus(StatusEvento.ABERTO)
+                .orElseThrow(() -> new OperacaoInvalidaException(
+                        "Nenhum evento esta aberto no momento. Abra um evento (POST /eventos) antes de iniciar vendas."));
+
         Venda venda = new Venda();
         venda.setUsuario(usuarioLogado);
+        venda.setEvento(eventoAberto);
         // status = ABERTA, valorTotal = ZERO e dataAbertura = agora ja vem
         // preenchidos pelos valores padrao definidos na entidade Venda.
         return toResponseDTO(vendaRepository.save(venda));
@@ -83,7 +103,10 @@ public class VendaService {
                     "Produto '" + produto.getNome() + "' esta desativado e nao pode ser vendido");
         }
 
-        validarEstoqueDisponivel(produto, dto.getQuantidade());
+        // Fase 6: o estoque verificado e o do EVENTO desta venda, nao mais
+        // o Produto.quantidadeEmEstoque global.
+        EstoqueEvento estoqueEvento = buscarEstoqueEventoOuFalhar(venda.getEvento(), produto);
+        validarEstoqueDisponivel(estoqueEvento, dto.getQuantidade());
 
         ItemVenda item = new ItemVenda();
         item.setVenda(venda);
@@ -109,7 +132,8 @@ public class VendaService {
         validarVendaAberta(venda);
 
         ItemVenda item = buscarItemOuFalhar(venda, itemId);
-        validarEstoqueDisponivel(item.getProduto(), dto.getQuantidade());
+        EstoqueEvento estoqueEvento = buscarEstoqueEventoOuFalhar(venda.getEvento(), item.getProduto());
+        validarEstoqueDisponivel(estoqueEvento, dto.getQuantidade());
 
         item.setQuantidade(dto.getQuantidade());
         recalcularTotal(venda);
@@ -185,18 +209,19 @@ public class VendaService {
         }
 
         try {
-            // Revalida o estoque de cada produto (pode ter mudado desde que
-            // o item foi adicionado ao carrinho) e desconta a quantidade vendida.
+            // Revalida o estoque de cada produto NO EVENTO desta venda (pode
+            // ter mudado desde que o item foi adicionado ao carrinho) e
+            // desconta a quantidade vendida.
             for (ItemVenda item : venda.getItens()) {
-                Produto produto = item.getProduto();
-                validarEstoqueDisponivel(produto, item.getQuantidade());
+                EstoqueEvento estoqueEvento = buscarEstoqueEventoOuFalhar(venda.getEvento(), item.getProduto());
+                validarEstoqueDisponivel(estoqueEvento, item.getQuantidade());
 
-                produto.setQuantidadeEmEstoque(produto.getQuantidadeEmEstoque() - item.getQuantidade());
+                estoqueEvento.setQuantidadeAtual(estoqueEvento.getQuantidadeAtual() - item.getQuantidade());
                 // Ao salvar aqui, o Hibernate confere o campo @Version do
-                // produto — se outra venda alterou este mesmo produto entre
-                // a leitura e este save(), ele lanca
-                // ObjectOptimisticLockingFailureException (capturado abaixo).
-                produtoRepository.save(produto);
+                // EstoqueEvento — se outra venda alterou o mesmo produto
+                // deste mesmo evento entre a leitura e este save(), ele
+                // lanca ObjectOptimisticLockingFailureException (capturado abaixo).
+                estoqueEventoRepository.save(estoqueEvento);
             }
 
             venda.setStatus(StatusVenda.FINALIZADA);
@@ -242,11 +267,25 @@ public class VendaService {
         }
     }
 
-    private void validarEstoqueDisponivel(Produto produto, int quantidadeSolicitada) {
-        if (quantidadeSolicitada > produto.getQuantidadeEmEstoque()) {
+    /**
+     * Busca a linha de estoque de um produto dentro do evento informado.
+     * Se nao existir, significa que ninguem alocou estoque desse produto
+     * pra esse evento ainda (POST /eventos/{id}/produtos) — nesse caso o
+     * produto simplesmente nao pode ser vendido ali.
+     */
+    private EstoqueEvento buscarEstoqueEventoOuFalhar(Evento evento, Produto produto) {
+        return estoqueEventoRepository.findByEventoAndProduto(evento, produto)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Produto '" + produto.getNome() + "' nao esta disponivel no evento '"
+                        + evento.getNome() + "'. Um ADMIN precisa alocar estoque dele primeiro "
+                        + "(POST /eventos/" + evento.getId() + "/produtos)."));
+    }
+
+    private void validarEstoqueDisponivel(EstoqueEvento estoqueEvento, int quantidadeSolicitada) {
+        if (quantidadeSolicitada > estoqueEvento.getQuantidadeAtual()) {
             throw new EstoqueInsuficienteException(
-                    "Estoque insuficiente para '" + produto.getNome() + "': "
-                    + "disponivel " + produto.getQuantidadeEmEstoque()
+                    "Estoque insuficiente para '" + estoqueEvento.getProduto().getNome()
+                    + "' neste evento: disponivel " + estoqueEvento.getQuantidadeAtual()
                     + ", solicitado " + quantidadeSolicitada);
         }
     }
@@ -267,11 +306,18 @@ public class VendaService {
                 .map(this::toItemResponseDTO)
                 .collect(Collectors.toList());
 
+        // Vendas criadas antes da Fase 6 nao tem evento — tratamos null com
+        // cuidado aqui em vez de deixar um NullPointerException estourar.
+        Long eventoId = venda.getEvento() != null ? venda.getEvento().getId() : null;
+        String nomeEvento = venda.getEvento() != null ? venda.getEvento().getNome() : null;
+
         return new VendaResponseDTO(
                 venda.getId(),
                 venda.getStatus().name(),
                 venda.getUsuario().getId(),
                 venda.getUsuario().getNome(),
+                eventoId,
+                nomeEvento,
                 itensDTO,
                 venda.getValorTotal(),
                 venda.getDataAbertura(),
