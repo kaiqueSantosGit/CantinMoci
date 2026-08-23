@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap');
+@import "tailwindcss";
+
+/*
+  Tokens de cor — mesma identidade visual definida no protótipo (mockup)
+  aprovado antes de começar o código. Ficam como variáveis CSS puras (não
+  no @theme do Tailwind) de propósito: assim o app inteiro e o mockup usam
+  exatamente a mesma fonte de verdade, e dá pra trocar tema (claro/escuro)
+  sem duplicar classes Tailwind.
+*/
+:root {
+  --paper: #F5F6F0;
+  --surface: #FFFFFF;
+  --surface-sunken: #ECEEE6;
+  --ink: #232420;
+  --ink-soft: #5B5D53;
+  --ink-faint: #93958A;
+  --line: #DEE0D5;
+  --brand: #1F5245;
+  --brand-strong: #143A31;
+  --brand-tint: #E4EEE9;
+  --accent: #C97B22;
+  --accent-tint: #F7E7D2;
+  --danger: #B5482F;
+  --danger-tint: #F5E1DA;
+  --success: #3E7A4E;
+  --success-tint: #E3EFE2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #14160F;
+    --surface: #1B1E15;
+    --surface-sunken: #23261C;
+    --ink: #EEEFE7;
+    --ink-soft: #B2B4A5;
+    --ink-faint: #767A6A;
+    --line: #33362A;
+    --brand: #6FBB9E;
+    --brand-strong: #8FD0B6;
+    --brand-tint: #21332C;
+    --accent: #E3A054;
+    --accent-tint: #362A18;
+    --danger: #E19781;
+    --danger-tint: #3A241E;
+    --success: #8FC79A;
+    --success-tint: #23331F;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #14160F;
+  --surface: #1B1E15;
+  --surface-sunken: #23261C;
+  --ink: #EEEFE7;
+  --ink-soft: #B2B4A5;
+  --ink-faint: #767A6A;
+  --line: #33362A;
+  --brand: #6FBB9E;
+  --brand-strong: #8FD0B6;
+  --brand-tint: #21332C;
+  --accent: #E3A054;
+  --accent-tint: #362A18;
+  --danger: #E19781;
+  --danger-tint: #3A241E;
+  --success: #8FC79A;
+  --success-tint: #23331F;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Manrope', -apple-system, 'Segoe UI', sans-serif;
+}
+
+.num {
+  font-family: 'IBM Plex Mono', 'SF Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
