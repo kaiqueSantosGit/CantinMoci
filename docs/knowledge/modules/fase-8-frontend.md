@@ -52,7 +52,10 @@ Antes de qualquer código, um protótipo navegável (HTML/CSS/JS puro, publicado
   - Erros de estoque insuficiente (400 do backend) aparecem no carrinho sem corromper o estado local
   - Finalizar mostra mensagem de sucesso, atualiza o estoque exibido e já abre um carrinho novo automaticamente
   - Testado no navegador: adicionar, ajustar quantidade (+/−), remover, bloqueio por estoque esgotado (card desabilitado), erro de estoque insuficiente no meio do carrinho, finalizar — com o relatório do evento (tela de Eventos) conferido batendo com o resultado
-- Demais páginas (Dashboard, Usuarios) — placeholders "em construção" por enquanto
+- `src/pages/Usuarios.jsx` — **funcional de ponta a ponta**, restrita a ADMIN (dupla proteção: item de menu escondido no `AppShell` + guarda de cargo na própria página, caso alguém acesse a URL direto). Lista usuários ativos, cadastra (`UsuarioFormModal.jsx`), reseta senha de outro usuário (`SenhaModal.jsx` reaproveitado), desativa (`ConfirmDialog`) — o botão "Desativar" nem aparece na própria linha do usuário logado, evitando a tentativa que o backend recusaria com 409
+- **"Trocar minha senha"** (novo, no rodapé da barra lateral do `AppShell`) — acessível a qualquer cargo, reaproveita o `SenhaModal.jsx` genérico apontando pra `PUT /auth/me/senha` em vez de `PUT /usuarios/{id}/senha`
+- Testado no navegador: cadastro, reset de senha (confirmado também via `curl` que a senha nova realmente loga), desativação, e troca da própria senha sem perder a sessão ativa (token JWT não muda ao trocar senha)
+- Demais páginas (Dashboard) — placeholder "em construção" por enquanto
 
 ## Decisão de armazenamento do token
 
