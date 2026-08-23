@@ -79,7 +79,9 @@ function Icone({ children }) {
 export default function AppShell() {
   const { usuario, logout } = useAuth()
   const location = useLocation()
-  const titulo = TITULOS_POR_ROTA[location.pathname] ?? 'CantinMoci'
+  const titulo =
+    TITULOS_POR_ROTA[location.pathname] ??
+    (location.pathname.startsWith('/eventos/') ? 'Eventos' : 'CantinMoci')
   const iniciais = usuario?.nome
     ?.split(' ')
     .map((p) => p[0])
