@@ -53,6 +53,21 @@ isso não é problema — mas não escala indefinidamente.
 **Quando priorizar:** se o catálogo de produtos ou o histórico de vendas
 crescer muito (múltiplos eventos acumulados no mesmo banco).
 
+### Cancelar/abandonar um carrinho de venda
+Hoje não existe um jeito de cancelar uma venda `ABERTA` (carrinho iniciado e
+nunca finalizado) — nem pela API, nem pela tela. Isso tem uma consequência
+real: `POST /eventos/{id}/encerrar` recusa encerrar o evento enquanto
+existir qualquer venda `ABERTA` vinculada a ele (a mensagem de erro explica
+isso corretamente), então um operador que abre o PDV, não vende nada e sai
+da tela deixa um carrinho fantasma que só um `DELETE` manual no banco
+resolve. Descoberto na Fase 8 testando o "Encerrar evento" do frontend —
+não é bug, é a validação de negócio funcionando, mas falta a ferramenta pra
+resolver a causa.
+**Quando priorizar:** antes do primeiro evento real — sem isso, um operador
+que abandona o PDV no meio do expediente pode impedir o encerramento do
+evento sem ninguém entender o motivo pela UI (a tela mostra a mensagem, mas
+não há botão de ação a partir dela).
+
 ### Estratégia de backup do banco
 O plano gratuito do Neon tem retenção de backup limitada (poucos dias). Se
 os dados de um evento (vendas, produtos) forem perdidos, hoje não temos um

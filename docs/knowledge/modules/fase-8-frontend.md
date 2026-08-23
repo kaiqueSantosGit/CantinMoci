@@ -2,7 +2,7 @@
 
 Tags: #modulo #em-andamento #frontend #react
 
-Status: 🚧 Em andamento (iniciada em 2026-08-23) — setup, CORS e login funcionando; telas dos módulos ainda por construir
+Status: 🚧 Em andamento (iniciada em 2026-08-23) — todas as telas prontas e testadas (Login, Produtos, Eventos, Vendas, Usuários, Dashboard); falta só o deploy (Vercel/Netlify)
 
 ---
 
@@ -55,7 +55,9 @@ Antes de qualquer código, um protótipo navegável (HTML/CSS/JS puro, publicado
 - `src/pages/Usuarios.jsx` — **funcional de ponta a ponta**, restrita a ADMIN (dupla proteção: item de menu escondido no `AppShell` + guarda de cargo na própria página, caso alguém acesse a URL direto). Lista usuários ativos, cadastra (`UsuarioFormModal.jsx`), reseta senha de outro usuário (`SenhaModal.jsx` reaproveitado), desativa (`ConfirmDialog`) — o botão "Desativar" nem aparece na própria linha do usuário logado, evitando a tentativa que o backend recusaria com 409
 - **"Trocar minha senha"** (novo, no rodapé da barra lateral do `AppShell`) — acessível a qualquer cargo, reaproveita o `SenhaModal.jsx` genérico apontando pra `PUT /auth/me/senha` em vez de `PUT /usuarios/{id}/senha`
 - Testado no navegador: cadastro, reset de senha (confirmado também via `curl` que a senha nova realmente loga), desativação, e troca da própria senha sem perder a sessão ativa (token JWT não muda ao trocar senha)
-- Demais páginas (Dashboard) — placeholder "em construção" por enquanto
+- `src/pages/Dashboard.jsx` — **funcional de ponta a ponta**: descobre o evento `ABERTO` sozinho e mostra 4 cartões (arrecadado, quantidade de vendas, ticket médio, itens com estoque baixo — limite de 5 unidades), painel de últimas 6 vendas finalizadas e painel de estoque baixo. Estado vazio ("Nenhum evento aberto", com link pra Eventos) quando não há evento `ABERTO`. Testado no navegador com dados reais (Arrecadado R$24,20, 3 vendas, ticket médio R$8,07)
+  - Bug corrigido antes do commit: `setEventoAberto(aberto)` era chamado antes do `Promise.all([relatório, estoque, vendas])` resolver, criando uma janela onde a tela tentava ler `relatorio.valorTotalArrecadado` com `relatorio` ainda `null`. Corrigido guardando tudo atrás de um único `carregando` e só marcando o evento como pronto pra exibir depois que todos os dados chegam juntos
+  - Achado (não é bug do Dashboard): ao testar o estado vazio, o clique em "Encerrar evento" pareceu não fazer efeito — investigado com `curl` direto no backend, e a causa real é uma regra de negócio funcionando corretamente: o backend recusa (`409`) encerrar um evento com vendas `ABERTA` (carrinhos abertos) pendentes, e a tela de Eventos já mostra essa mensagem. O evento de teste tinha carrinhos vazios abandonados de sessões de teste anteriores. Registrado em [[backlog]] a falta de um jeito de cancelar/abandonar um carrinho pela UI
 
 ## Decisão de armazenamento do token
 
