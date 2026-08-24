@@ -1,8 +1,8 @@
 # Fase 8 — Frontend
 
-Tags: #modulo #em-andamento #frontend #react
+Tags: #modulo #concluido #frontend #react
 
-Status: 🚧 Em andamento (iniciada em 2026-08-23) — todas as telas prontas e testadas (Login, Produtos, Eventos, Vendas, Usuários, Dashboard); deploy na Vercel preparado no código, falta a parte no painel (ver `docs/deploy.md`)
+Status: ✅ Concluída (2026-08-23) — todas as telas prontas e testadas (Login, Produtos, Eventos, Vendas, Usuários, Dashboard), responsivo em mobile/tablet/desktop, no ar em https://cantin-moci.vercel.app
 
 ---
 
@@ -58,6 +58,42 @@ Antes de qualquer código, um protótipo navegável (HTML/CSS/JS puro, publicado
 - `src/pages/Dashboard.jsx` — **funcional de ponta a ponta**: descobre o evento `ABERTO` sozinho e mostra 4 cartões (arrecadado, quantidade de vendas, ticket médio, itens com estoque baixo — limite de 5 unidades), painel de últimas 6 vendas finalizadas e painel de estoque baixo. Estado vazio ("Nenhum evento aberto", com link pra Eventos) quando não há evento `ABERTO`. Testado no navegador com dados reais (Arrecadado R$24,20, 3 vendas, ticket médio R$8,07)
   - Bug corrigido antes do commit: `setEventoAberto(aberto)` era chamado antes do `Promise.all([relatório, estoque, vendas])` resolver, criando uma janela onde a tela tentava ler `relatorio.valorTotalArrecadado` com `relatorio` ainda `null`. Corrigido guardando tudo atrás de um único `carregando` e só marcando o evento como pronto pra exibir depois que todos os dados chegam juntos
   - Achado (não é bug do Dashboard): ao testar o estado vazio, o clique em "Encerrar evento" pareceu não fazer efeito — investigado com `curl` direto no backend, e a causa real é uma regra de negócio funcionando corretamente: o backend recusa (`409`) encerrar um evento com vendas `ABERTA` (carrinhos abertos) pendentes, e a tela de Eventos já mostra essa mensagem. O evento de teste tinha carrinhos vazios abandonados de sessões de teste anteriores. Registrado em [[backlog]] a falta de um jeito de cancelar/abandonar um carrinho pela UI
+
+## Responsividade mobile
+
+Feita depois que o sistema já estava no ar em produção (2026-08-23), varrendo
+todas as telas — até então o frontend era 100% desktop-first, sem nenhum
+breakpoint Tailwind. Mudanças por tela:
+
+- **AppShell (menu)** — a barra lateral fixa de 216px vira, abaixo de `md`
+  (768px), uma barra superior com botão "hambúrguer" que abre uma gaveta
+  deslizante com o mesmo conteúdo do menu (links + rodapé de usuário). O
+  conteúdo do menu foi extraído pra um componente interno (`ConteudoMenu`)
+  reaproveitado nos dois lugares, pra não duplicar a lista de links.
+- **Dashboard / EventoDetalhe** — grids de 2 e 3 colunas fixas (`gridTemplateColumns`
+  inline) viraram classes Tailwind responsivas (`grid-cols-1 md:grid-cols-2`),
+  empilhando em 1 coluna no celular.
+- **Produtos / Eventos / Usuários** — as tabelas de largura fixa (`tableLayout: fixed`)
+  ficavam ilegíveis num celular. Abaixo de `md`, cada uma vira uma lista de
+  cartões (um por linha, com os mesmos dados e ações); a tabela original
+  continua exatamente igual a partir de `md`.
+- **Vendas (PDV)** — a tela mais crítica pra decisão de UX, por ser a mais
+  provável de rodar num celular durante um evento de verdade. O grid fixo
+  "produtos + carrinho de 300px lado a lado" quebrava completamente no
+  celular. Solução: abaixo de `md`, o carrinho vira uma **barra fixa no
+  rodapé** (total + quantidade de itens sempre visível enquanto rola a
+  grade de produtos) que expande, ao tocar, numa gaveta com o carrinho
+  completo (mesmo conteúdo — extraído pra `conteudoCarrinho`, reaproveitado
+  entre o painel fixo do desktop e a gaveta do mobile). Decisão confirmada
+  com o usuário antes de implementar (alternativa descartada: carrinho
+  simples embaixo da grade, sem nada fixo).
+- **Modais** (formulários, confirmação, senha) — já eram responsivos desde
+  que foram criados (`max-w-sm` + `p-4` no overlay), sem mudança necessária.
+- **Login** — já funcionava bem no celular (card centralizado com padding),
+  sem mudança necessária.
+
+Testado em três resoluções (mobile 375px, tablet 768px, desktop) via
+navegador, telas por tela, sem regressão no layout desktop.
 
 ## Deploy (Vercel)
 

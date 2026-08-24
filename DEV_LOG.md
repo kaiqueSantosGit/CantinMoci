@@ -284,7 +284,7 @@ Cada funcionalidade segue este fluxo antes de avançar:
 
 ---
 
-### Fase 8 — Frontend 🚧 EM ANDAMENTO (iniciada em 2026-08-23)
+### Fase 8 — Frontend ✅ CONCLUÍDA (2026-08-23)
 
 **Planejamento visual:** protótipo navegável (login + painel + PDV de vendas + eventos + produtos + usuários) construído e aprovado antes do código — identidade: verde profundo (`#1F5245`) + âmbar (`#C97B22`), tipografia Manrope + IBM Plex Mono pra números.
 
@@ -318,7 +318,8 @@ Cada funcionalidade segue este fluxo antes de avançar:
 - [x] **Vendas (PDV)** — a tela mais completa: reaproveita o carrinho `ABERTA` já existente do operador (evita abandonar carrinhos ao recarregar a página), grade de produtos com estoque do evento em tempo real (desconta o que já está no carrinho, antes mesmo de confirmar no backend), clique soma quantidade na mesma linha em vez de duplicar, +/−/remover no carrinho, erro de estoque insuficiente exibido sem corromper o carrinho, finalizar mostra mensagem de sucesso e já abre um carrinho novo. Testado no navegador de ponta a ponta, inclusive o cenário de estoque esgotado bloqueando o card
 - [x] **Usuários** — tela restrita a ADMIN (dupla proteção: menu escondido + guarda na própria página), lista usuários ativos, cadastra (`POST /auth/register`), reseta senha de outro (`PUT /usuarios/{id}/senha`), desativa com confirmação (botão nem aparece na própria linha, evita o 409 de autodesativação). "Trocar minha senha" fica no rodapé da barra lateral, acessível a qualquer cargo — reaproveita o mesmo modal genérico de senha. Testado no navegador de ponta a ponta, incluindo confirmação via `curl` de que a senha resetada/trocada realmente funciona no login
 - [x] **Dashboard** — descobre o evento `ABERTO` sozinho e mostra 4 cartões (arrecadado, vendas, ticket médio, estoque baixo — limite de 5 unidades), últimas 6 vendas finalizadas e painel de estoque baixo; estado vazio ("Nenhum evento aberto") quando não há evento em andamento. Testado no navegador de ponta a ponta com dados reais
-- [ ] **Deploy (Vercel)** — preparação no código concluída: `.env.production` (aponta pro backend do Render), `vercel.json` (rewrite de rotas pro React Router funcionar em produção), build de produção testado localmente. Falta a parte no painel da Vercel (criar projeto, primeiro deploy) e liberar `CORS_ALLOWED_ORIGINS` no Render pra URL final — passo a passo em `docs/deploy.md`
+- [x] **Deploy (Vercel)** — no ar em `https://cantin-moci.vercel.app`, `CORS_ALLOWED_ORIGINS` liberado no Render, testado de ponta a ponta em produção (login, CRUD de produtos/eventos/usuários, PDV)
+- [x] **Responsividade mobile** — todas as telas revisadas e testadas em 375px (celular), 768px (tablet) e desktop, sem breakpoint nenhum antes disso. Menu lateral vira gaveta deslizante no mobile; tabelas (Produtos/Eventos/Usuários) viram lista de cartões; grids de 2-3 colunas empilham; o PDV (Vendas) ganhou um carrinho em barra fixa no rodapé que expande — decisão de UX confirmada com o usuário antes de implementar. Detalhes em `docs/knowledge/modules/fase-8-frontend.md`
 
 ---
 
