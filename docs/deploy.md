@@ -128,5 +128,121 @@ Não precisa cadastrar `PORT` — o Render injeta essa automaticamente.
 
 ## Próximos passos (depois que isso estiver validado)
 
-- Quando chegarmos na Fase 7 (Frontend), ele também poderá ser hospedado de graça (Vercel/Netlify), e vamos configurar CORS no backend para aceitar requisições do domínio do frontend.
 - Se um dia quiser um domínio próprio (ex: `cantinmoci.com.br`), dá pra apontar pro Render depois — não é necessário agora.
+
+---
+
+# Deploy do Frontend (Fase 8) — Vercel
+
+> Objetivo: publicar o frontend numa URL pública, gratuita, com deploy
+> automático a cada push. Continua a mesma filosofia zero-custo da Fase 4.
+
+Arquitetura:
+
+```
+GitHub (seu repositório)
+   │  push
+   ▼
+Vercel (Static Site, free tier) ── builda com Vite (npm run build)
+   │
+   │  fetch (VITE_API_URL)
+   ▼
+Render (backend, já no ar)
+```
+
+Este guia segue o mesmo formato da Fase 4: **Parte A** é o que já foi
+preparado no código, **Parte B** é o que precisa ser feito no painel da
+Vercel (sua parte), **Parte C** valida o resultado.
+
+## Parte A — O que já foi preparado no código
+
+- `frontend/cantinmoci/.env.production` — define `VITE_API_URL` apontando
+  pro backend em produção (`https://cantinmoci.onrender.com`). O Vite troca
+  automaticamente para esse arquivo quando builda em modo produção
+  (`npm run build`), sem precisar de nenhuma configuração extra na Vercel.
+  Não tem segredo nenhum aqui — é só uma URL pública, por isso pode ficar
+  versionado no Git (mesmo padrão do `.env.development`).
+- `frontend/cantinmoci/vercel.json` — o app usa React Router no modo
+  padrão (rotas tipo `/eventos/5` não existem como arquivo físico). Sem
+  essa configuração, recarregar a página numa rota assim daria 404 na
+  Vercel. Esse arquivo redireciona qualquer rota pro `index.html`, deixando
+  o React Router assumir a partir daí.
+- Testado localmente: `npm run build` gera o `dist/` corretamente e o
+  código buildado já aponta pro backend de produção (confirmado inspecionando
+  o JS gerado).
+
+## Parte B — O que você precisa fazer
+
+### B.1 — Criar conta na Vercel e importar o repositório
+
+1. Acesse https://vercel.com e crie uma conta gratuita (recomendo logar
+   com GitHub — facilita conectar o repositório, igual fizemos no Render).
+2. No Dashboard, clique em **"Add New..."** → **"Project"**.
+3. Selecione o repositório do CantinMoci na lista (autorize o acesso da
+   Vercel ao GitHub se pedir).
+
+### B.2 — Configurar o projeto
+
+Quando a Vercel pedir as configurações do projeto:
+
+- **Framework Preset:** Vite (a Vercel geralmente detecta sozinha)
+- **Root Directory:** `frontend/cantinmoci` — **esse é o passo que mais
+  costuma passar despercebido**, o repositório tem backend e frontend juntos,
+  então é essencial apontar pra subpasta certa
+- **Build Command:** `npm run build` (padrão, não precisa mexer)
+- **Output Directory:** `dist` (padrão, não precisa mexer)
+
+> Não precisa cadastrar nenhuma variável de ambiente na Vercel — o
+> `VITE_API_URL` já vem do `.env.production` versionado no repositório.
+
+### B.3 — Rodar o primeiro deploy
+
+1. Clique em **"Deploy"**.
+2. Acompanhe o log de build (bem mais rápido que o do Render — sem Docker).
+3. Quando terminar, a Vercel mostra uma URL pública, algo como:
+   ```
+   https://cantinmoci.vercel.app
+   ```
+   (o nome exato depende do que ficar disponível/do nome do projeto)
+
+### B.4 — Liberar o CORS no backend pra essa URL
+
+Esse passo é essencial — sem ele, o navegador bloqueia toda chamada do
+frontend novo pra API (mesmo problema que resolvemos em localhost na Fase 8,
+agora pro domínio de produção):
+
+1. Copie a URL que a Vercel te deu (ex: `https://cantinmoci.vercel.app`).
+2. No painel do **Render**, abra o serviço do backend → **"Environment"**.
+3. Edite a variável `CORS_ALLOWED_ORIGINS` (se ainda não existir, crie) com
+   o valor:
+   ```
+   https://cantinmoci.vercel.app
+   ```
+   Se um dia precisar liberar mais de um domínio, separe por vírgula, sem
+   espaço: `https://dominio1.com,https://dominio2.com`.
+4. Salve — o Render reinicia o serviço sozinho aplicando a variável nova.
+
+## Parte C — Validar
+
+1. Abra a URL da Vercel no navegador.
+2. Faça login com um usuário real.
+3. Abra o DevTools (F12) → aba "Console" — não deve aparecer nenhum erro
+   de CORS.
+4. Navegue por Produtos, Eventos, Vendas, Usuários, Dashboard — confirme
+   que tudo carrega dados reais do backend em produção.
+5. Se der tudo certo, me avisa que eu atualizo o DEV_LOG marcando a Fase 8
+   como concluída.
+
+## Troubleshooting comum
+
+- **Build falha na Vercel:** confira se o "Root Directory" está mesmo como
+  `frontend/cantinmoci` — é o erro mais comum em repositórios com backend e
+  frontend juntos.
+- **Tela em branco ou 404 ao recarregar uma rota (`/eventos/5`):** confirma
+  se o `vercel.json` foi detectado (ele precisa estar dentro da Root
+  Directory configurada).
+- **Erro de CORS no console do navegador:** confirme que `CORS_ALLOWED_ORIGINS`
+  no Render tem a URL **exata** da Vercel, sem barra `/` no final.
+- **Login funciona mas as telas ficam "Carregando…" pra sempre:** normalmente
+  é o Render "dormindo" (mesmo comportamento do free tier explicado na Fase
+  4) — a primeira requisição depois de um tempo parado demora ~30-50s.

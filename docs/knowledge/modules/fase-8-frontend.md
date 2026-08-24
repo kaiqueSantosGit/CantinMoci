@@ -2,7 +2,7 @@
 
 Tags: #modulo #em-andamento #frontend #react
 
-Status: 🚧 Em andamento (iniciada em 2026-08-23) — todas as telas prontas e testadas (Login, Produtos, Eventos, Vendas, Usuários, Dashboard); falta só o deploy (Vercel/Netlify)
+Status: 🚧 Em andamento (iniciada em 2026-08-23) — todas as telas prontas e testadas (Login, Produtos, Eventos, Vendas, Usuários, Dashboard); deploy na Vercel preparado no código, falta a parte no painel (ver `docs/deploy.md`)
 
 ---
 
@@ -58,6 +58,13 @@ Antes de qualquer código, um protótipo navegável (HTML/CSS/JS puro, publicado
 - `src/pages/Dashboard.jsx` — **funcional de ponta a ponta**: descobre o evento `ABERTO` sozinho e mostra 4 cartões (arrecadado, quantidade de vendas, ticket médio, itens com estoque baixo — limite de 5 unidades), painel de últimas 6 vendas finalizadas e painel de estoque baixo. Estado vazio ("Nenhum evento aberto", com link pra Eventos) quando não há evento `ABERTO`. Testado no navegador com dados reais (Arrecadado R$24,20, 3 vendas, ticket médio R$8,07)
   - Bug corrigido antes do commit: `setEventoAberto(aberto)` era chamado antes do `Promise.all([relatório, estoque, vendas])` resolver, criando uma janela onde a tela tentava ler `relatorio.valorTotalArrecadado` com `relatorio` ainda `null`. Corrigido guardando tudo atrás de um único `carregando` e só marcando o evento como pronto pra exibir depois que todos os dados chegam juntos
   - Achado (não é bug do Dashboard): ao testar o estado vazio, o clique em "Encerrar evento" pareceu não fazer efeito — investigado com `curl` direto no backend, e a causa real é uma regra de negócio funcionando corretamente: o backend recusa (`409`) encerrar um evento com vendas `ABERTA` (carrinhos abertos) pendentes, e a tela de Eventos já mostra essa mensagem. O evento de teste tinha carrinhos vazios abandonados de sessões de teste anteriores. Registrado em [[backlog]] a falta de um jeito de cancelar/abandonar um carrinho pela UI
+
+## Deploy (Vercel)
+
+Guia completo em `docs/deploy.md`. Resumo da decisão: Vercel escolhida (em
+vez de Netlify) por integração mais direta com Vite/React e deploy automático
+a cada push. Precisa liberar `CORS_ALLOWED_ORIGINS` no Render pra URL final
+da Vercel — sem isso o navegador bloqueia toda chamada à API.
 
 ## Decisão de armazenamento do token
 
