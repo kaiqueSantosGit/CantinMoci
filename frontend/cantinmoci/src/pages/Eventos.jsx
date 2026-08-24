@@ -73,47 +73,70 @@ export default function Eventos() {
         </p>
       )}
 
-      <div className="rounded-xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
-        {!carregando && eventos.length === 0 && !erro ? (
-          <div className="text-center py-10">
-            <p className="text-sm font-semibold mb-1">Nenhum evento cadastrado</p>
-            <p className="text-[13px] m-0" style={{ color: 'var(--ink-faint)' }}>
-              Clique em "+ Novo evento" pra abrir o primeiro.
-            </p>
+      {!carregando && eventos.length === 0 && !erro ? (
+        <div className="rounded-xl text-center py-10" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+          <p className="text-sm font-semibold mb-1">Nenhum evento cadastrado</p>
+          <p className="text-[13px] m-0" style={{ color: 'var(--ink-faint)' }}>
+            Clique em "+ Novo evento" pra abrir o primeiro.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Celular/tablet: lista de cartões */}
+          <div className="md:hidden flex flex-col gap-2.5">
+            {eventos.map((evento) => (
+              <Link
+                key={evento.id}
+                to={`/eventos/${evento.id}`}
+                className="block rounded-xl p-4"
+                style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="text-[13.5px] font-semibold" style={{ color: 'var(--brand-strong)' }}>{evento.nome}</span>
+                  <StatusBadge status={evento.status} />
+                </div>
+                <p className="text-[12.5px] m-0 mt-2" style={{ color: 'var(--ink-faint)' }}>
+                  {evento.local || 'sem local informado'} · <span className="num">{formatarData(evento.dataAbertura)}</span>
+                </p>
+              </Link>
+            ))}
           </div>
-        ) : (
-          <table className="w-full text-[13.5px]" style={{ tableLayout: 'fixed' }}>
-            <colgroup>
-              <col style={{ width: '38%' }} />
-              <col style={{ width: '26%' }} />
-              <col style={{ width: '18%' }} />
-              <col style={{ width: '18%' }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Evento</th>
-                <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Local</th>
-                <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Status</th>
-                <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Aberto em</th>
-              </tr>
-            </thead>
-            <tbody>
-              {eventos.map((evento) => (
-                <tr key={evento.id}>
-                  <td className="py-3 px-5" style={{ borderBottom: '1px solid var(--line)' }}>
-                    <Link to={`/eventos/${evento.id}`} className="font-semibold" style={{ color: 'var(--brand-strong)' }}>
-                      {evento.nome}
-                    </Link>
-                  </td>
-                  <td className="py-3 px-5" style={{ borderBottom: '1px solid var(--line)', color: 'var(--ink-soft)' }}>{evento.local || '—'}</td>
-                  <td className="py-3 px-5" style={{ borderBottom: '1px solid var(--line)' }}><StatusBadge status={evento.status} /></td>
-                  <td className="py-3 px-5 num" style={{ borderBottom: '1px solid var(--line)', color: 'var(--ink-soft)' }}>{formatarData(evento.dataAbertura)}</td>
+
+          {/* Desktop: tabela */}
+          <div className="hidden md:block rounded-xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+            <table className="w-full text-[13.5px]" style={{ tableLayout: 'fixed' }}>
+              <colgroup>
+                <col style={{ width: '38%' }} />
+                <col style={{ width: '26%' }} />
+                <col style={{ width: '18%' }} />
+                <col style={{ width: '18%' }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Evento</th>
+                  <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Local</th>
+                  <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Status</th>
+                  <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Aberto em</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {eventos.map((evento) => (
+                  <tr key={evento.id}>
+                    <td className="py-3 px-5" style={{ borderBottom: '1px solid var(--line)' }}>
+                      <Link to={`/eventos/${evento.id}`} className="font-semibold" style={{ color: 'var(--brand-strong)' }}>
+                        {evento.nome}
+                      </Link>
+                    </td>
+                    <td className="py-3 px-5" style={{ borderBottom: '1px solid var(--line)', color: 'var(--ink-soft)' }}>{evento.local || '—'}</td>
+                    <td className="py-3 px-5" style={{ borderBottom: '1px solid var(--line)' }}><StatusBadge status={evento.status} /></td>
+                    <td className="py-3 px-5 num" style={{ borderBottom: '1px solid var(--line)', color: 'var(--ink-soft)' }}>{formatarData(evento.dataAbertura)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       {modalAberto && <EventoFormModal onFechar={() => setModalAberto(false)} onSalvo={handleSalvo} />}
     </div>

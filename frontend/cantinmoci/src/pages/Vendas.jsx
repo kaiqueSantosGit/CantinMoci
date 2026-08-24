@@ -21,6 +21,9 @@ export default function Vendas() {
   const [erroCarrinho, setErroCarrinho] = useState('')
   const [finalizando, setFinalizando] = useState(false)
   const [mensagemSucesso, setMensagemSucesso] = useState('')
+  // Só usado no celular — o carrinho vira uma barra fixa no rodapé que expande
+  // ao tocar, em vez de ficar sempre visível do lado (não tem espaço pra isso).
+  const [carrinhoAberto, setCarrinhoAberto] = useState(false)
 
   async function carregarEstoque(eventoId) {
     const [estoque, prods] = await Promise.all([listarProdutosDoEvento(eventoId), listarProdutos()])
@@ -115,6 +118,7 @@ export default function Vendas() {
       await carregarEstoque(eventoAberto.id)
       const novaVenda = await abrirVenda()
       setVenda(novaVenda)
+      setCarrinhoAberto(false)
       setTimeout(() => setMensagemSucesso(''), 3500)
     } catch (e) {
       setErroCarrinho(e.message)
@@ -149,16 +153,65 @@ export default function Vendas() {
     )
   }
 
+  // Conteúdo do carrinho — reaproveitado entre o painel fixo do desktop e a
+  // gaveta que sobe do rodapé no celular, pra não duplicar essa lógica.
+  const conteudoCarrinho = (
+    <>
+      <div className="px-[18px] py-1 min-h-[80px]">
+        {venda.itens.length === 0 ? (
+          <p className="text-[12.5px] text-center py-6 m-0" style={{ color: 'var(--ink-faint)' }}>
+            Toque num produto pra adicionar
+          </p>
+        ) : (
+          venda.itens.map((item) => (
+            <div key={item.id} className="flex items-center justify-between py-2.5" style={{ borderBottom: '1px solid var(--line)' }}>
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold m-0 truncate">{item.nomeProduto}</p>
+                <p className="text-[12.5px] num m-0" style={{ color: 'var(--ink-faint)' }}>{moeda(item.subtotal)}</p>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button onClick={() => handleDiminuir(item)} className="w-7 h-7 md:w-6 md:h-6 rounded-md text-sm font-bold" style={{ background: 'var(--surface-sunken)' }}>−</button>
+                <span className="text-[13px] font-semibold w-4 text-center num">{item.quantidade}</span>
+                <button onClick={() => handleAdicionar(item.produtoId)} className="w-7 h-7 md:w-6 md:h-6 rounded-md text-sm font-bold" style={{ background: 'var(--surface-sunken)' }}>+</button>
+                <button onClick={() => handleRemover(item)} className="text-[11px] font-semibold ml-1" style={{ color: 'var(--danger)' }}>remover</button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {erroCarrinho && (
+        <p className="text-[12.5px] px-[18px] pt-2 m-0" style={{ color: 'var(--danger)' }}>{erroCarrinho}</p>
+      )}
+
+      <div className="flex items-baseline justify-between px-[18px] py-4" style={{ borderTop: '1px solid var(--line)' }}>
+        <span className="text-[12.5px] font-semibold" style={{ color: 'var(--ink-faint)' }}>Total</span>
+        <span className="text-xl font-semibold num">{moeda(venda.valorTotal)}</span>
+      </div>
+
+      <button
+        onClick={handleFinalizar}
+        disabled={venda.itens.length === 0 || finalizando}
+        className="mx-[18px] mb-[18px] h-[46px] md:h-[42px] rounded-[9px] text-[13.5px] font-bold disabled:opacity-50"
+        style={{ background: 'var(--accent)', color: '#fff' }}
+      >
+        {finalizando ? 'Finalizando…' : 'Finalizar venda'}
+      </button>
+    </>
+  )
+
+  const totalItens = venda.itens.reduce((soma, i) => soma + i.quantidade, 0)
+
   return (
-    <div>
+    <div className="pb-24 md:pb-0">
       {mensagemSucesso && (
         <div className="rounded-lg px-4 py-2.5 mb-4 text-[13.5px] font-semibold" style={{ background: 'var(--success-tint)', color: 'var(--success)' }}>
           {mensagemSucesso}
         </div>
       )}
 
-      <div className="grid gap-5" style={{ gridTemplateColumns: 'minmax(0, 1fr) 300px' }}>
-        <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))' }}>
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_300px] gap-5">
+        <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
           {estoqueEvento.length === 0 ? (
             <p className="text-[13px] col-span-full" style={{ color: 'var(--ink-faint)' }}>
               Nenhum produto alocado nesse evento ainda —{' '}
@@ -189,53 +242,45 @@ export default function Vendas() {
           )}
         </div>
 
-        <div className="rounded-xl flex flex-col" style={{ background: 'var(--surface)', border: '1px solid var(--line)', alignSelf: 'start' }}>
+        {/* Desktop: carrinho sempre visível ao lado */}
+        <div className="hidden md:flex rounded-xl flex-col" style={{ background: 'var(--surface)', border: '1px solid var(--line)', alignSelf: 'start' }}>
           <div className="px-[18px] py-4" style={{ borderBottom: '1px solid var(--line)' }}>
             <h3 className="text-[14.5px] font-semibold m-0">Carrinho — venda #{venda.id}</h3>
           </div>
-
-          <div className="px-[18px] py-1 min-h-[80px]">
-            {venda.itens.length === 0 ? (
-              <p className="text-[12.5px] text-center py-6 m-0" style={{ color: 'var(--ink-faint)' }}>
-                Toque num produto pra adicionar
-              </p>
-            ) : (
-              venda.itens.map((item) => (
-                <div key={item.id} className="flex items-center justify-between py-2.5" style={{ borderBottom: '1px solid var(--line)' }}>
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-semibold m-0 truncate">{item.nomeProduto}</p>
-                    <p className="text-[12.5px] num m-0" style={{ color: 'var(--ink-faint)' }}>{moeda(item.subtotal)}</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <button onClick={() => handleDiminuir(item)} className="w-6 h-6 rounded-md text-sm font-bold" style={{ background: 'var(--surface-sunken)' }}>−</button>
-                    <span className="text-[13px] font-semibold w-4 text-center num">{item.quantidade}</span>
-                    <button onClick={() => handleAdicionar(item.produtoId)} className="w-6 h-6 rounded-md text-sm font-bold" style={{ background: 'var(--surface-sunken)' }}>+</button>
-                    <button onClick={() => handleRemover(item)} className="text-[11px] font-semibold ml-1" style={{ color: 'var(--danger)' }}>remover</button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          {erroCarrinho && (
-            <p className="text-[12.5px] px-[18px] pt-2 m-0" style={{ color: 'var(--danger)' }}>{erroCarrinho}</p>
-          )}
-
-          <div className="flex items-baseline justify-between px-[18px] py-4" style={{ borderTop: '1px solid var(--line)' }}>
-            <span className="text-[12.5px] font-semibold" style={{ color: 'var(--ink-faint)' }}>Total</span>
-            <span className="text-xl font-semibold num">{moeda(venda.valorTotal)}</span>
-          </div>
-
-          <button
-            onClick={handleFinalizar}
-            disabled={venda.itens.length === 0 || finalizando}
-            className="mx-[18px] mb-[18px] h-[42px] rounded-[9px] text-[13.5px] font-bold disabled:opacity-50"
-            style={{ background: 'var(--accent)', color: '#fff' }}
-          >
-            {finalizando ? 'Finalizando…' : 'Finalizar venda'}
-          </button>
+          {conteudoCarrinho}
         </div>
       </div>
+
+      {/* Celular: barra fixa no rodapé com o resumo, toca pra expandir */}
+      <button
+        onClick={() => setCarrinhoAberto(true)}
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 flex items-center justify-between px-5 h-[64px]"
+        style={{ background: 'var(--brand)', color: 'var(--surface)', boxShadow: '0 -4px 16px rgba(0,0,0,0.15)' }}
+      >
+        <span className="text-[13.5px] font-semibold">
+          {totalItens === 0 ? 'Carrinho vazio' : `${totalItens} ${totalItens === 1 ? 'item' : 'itens'} · Ver carrinho`}
+        </span>
+        <span className="text-[17px] font-bold num">{moeda(venda.valorTotal)}</span>
+      </button>
+
+      {/* Celular: gaveta do carrinho, sobe do rodapé */}
+      {carrinhoAberto && (
+        <div className="md:hidden fixed inset-0 z-50 flex items-end">
+          <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.45)' }} onClick={() => setCarrinhoAberto(false)} />
+          <div
+            className="relative w-full max-h-[85vh] flex flex-col rounded-t-2xl overflow-y-auto"
+            style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderBottom: 'none' }}
+          >
+            <div className="flex items-center justify-between px-[18px] py-4" style={{ borderBottom: '1px solid var(--line)' }}>
+              <h3 className="text-[14.5px] font-semibold m-0">Carrinho — venda #{venda.id}</h3>
+              <button onClick={() => setCarrinhoAberto(false)} aria-label="Fechar carrinho" className="text-[13px] font-semibold" style={{ color: 'var(--ink-faint)' }}>
+                Fechar
+              </button>
+            </div>
+            {conteudoCarrinho}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

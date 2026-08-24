@@ -71,11 +71,90 @@ const ITENS_NAV = [
   },
 ]
 
-function Icone({ children }) {
+function Icone({ children, className = 'w-[17px] h-[17px]' }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-[17px] h-[17px] shrink-0" style={{ stroke: 'currentColor' }}>
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${className} shrink-0`} style={{ stroke: 'currentColor' }}>
       {children}
     </svg>
+  )
+}
+
+function LogoCantinMoci() {
+  return (
+    <div className="flex items-center gap-[9px] px-1.5">
+      <span className="w-[30px] h-[30px] rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--brand)' }}>
+        <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" style={{ stroke: 'var(--surface)' }}>
+          <path d="M4 8l2-4h12l2 4" />
+          <path d="M4 8h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8z" />
+          <path d="M9 12v4M15 12v4" />
+        </svg>
+      </span>
+      <strong className="text-[15px] font-extrabold">CantinMoci</strong>
+    </div>
+  )
+}
+
+/**
+ * Conteúdo do menu (links + rodapé com usuário/ações) — compartilhado entre
+ * a barra lateral fixa do desktop e a gaveta deslizante do mobile, pra não
+ * duplicar a lista de links em dois lugares.
+ */
+function ConteudoMenu({ usuario, onNavegar, onTrocarSenha, onSair }) {
+  return (
+    <>
+      <LogoCantinMoci />
+
+      <nav className="flex flex-col gap-0.5">
+        {ITENS_NAV.filter((item) => !item.somenteAdmin || usuario?.cargo === 'ADMIN').map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            onClick={onNavegar}
+            className={({ isActive }) =>
+              `flex items-center gap-2.5 h-[38px] px-2.5 rounded-lg text-[13.5px] font-semibold transition-colors ${
+                isActive ? '' : 'hover:opacity-80'
+              }`
+            }
+            style={({ isActive }) => ({
+              background: isActive ? 'var(--brand-tint)' : 'transparent',
+              color: isActive ? 'var(--brand-strong)' : 'var(--ink-soft)',
+            })}
+          >
+            <Icone>{item.icone}</Icone>
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="mt-auto pt-[14px]" style={{ borderTop: '1px solid var(--line)' }}>
+        <div className="flex items-center gap-2.5">
+          <span
+            className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+            style={{ background: 'var(--accent-tint)', color: 'var(--accent)' }}
+          >
+            {usuario?.nome
+              ?.split(' ')
+              .map((p) => p[0])
+              .slice(0, 2)
+              .join('')
+              .toUpperCase()}
+          </span>
+          <span className="min-w-0">
+            <strong className="block text-[12.5px] truncate">{usuario?.nome}</strong>
+            <span className="block text-[11px]" style={{ color: 'var(--ink-faint)' }}>{usuario?.cargo}</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-3 mt-2.5 pl-[2px]">
+          <button onClick={onTrocarSenha} className="text-[11px] font-semibold" style={{ color: 'var(--ink-faint)' }}>
+            Trocar senha
+          </button>
+          <button onClick={onSair} className="text-[11px] font-semibold" style={{ color: 'var(--ink-faint)' }}>
+            Sair
+          </button>
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -83,90 +162,68 @@ export default function AppShell() {
   const { usuario, logout } = useAuth()
   const location = useLocation()
   const [modalSenha, setModalSenha] = useState(false)
+  const [menuAberto, setMenuAberto] = useState(false)
   const titulo =
     TITULOS_POR_ROTA[location.pathname] ??
     (location.pathname.startsWith('/eventos/') ? 'Eventos' : 'CantinMoci')
-  const iniciais = usuario?.nome
-    ?.split(' ')
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
 
   async function handleTrocarSenha(novaSenha) {
     await trocarMinhaSenha({ novaSenha })
     setModalSenha(false)
   }
 
+  function abrirModalSenha() {
+    setMenuAberto(false)
+    setModalSenha(true)
+  }
+
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Barra superior — só no mobile/tablet (menu vira gaveta) */}
+      <div
+        className="md:hidden flex items-center justify-between h-14 px-4 shrink-0"
+        style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)' }}
+      >
+        <button
+          onClick={() => setMenuAberto(true)}
+          aria-label="Abrir menu"
+          className="w-9 h-9 -ml-1.5 flex items-center justify-center rounded-lg"
+        >
+          <Icone className="w-5 h-5"><path d="M4 7h16M4 12h16M4 17h16" /></Icone>
+        </button>
+        <h2 className="text-[15px] font-semibold">{titulo}</h2>
+        <span
+          className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
+          style={{ background: 'var(--accent-tint)', color: 'var(--accent)' }}
+        >
+          {usuario?.nome
+            ?.split(' ')
+            .map((p) => p[0])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase()}
+        </span>
+      </div>
+
+      {/* Gaveta do menu mobile — só existe (e só recebe clique) quando aberta */}
+      {menuAberto && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.45)' }} onClick={() => setMenuAberto(false)} />
+          <aside
+            className="relative w-[248px] max-w-[80vw] h-full flex flex-col gap-7 px-[14px] py-5 overflow-y-auto"
+            style={{ background: 'var(--surface)', borderRight: '1px solid var(--line)' }}
+          >
+            <ConteudoMenu usuario={usuario} onNavegar={() => setMenuAberto(false)} onTrocarSenha={abrirModalSenha} onSair={logout} />
+          </aside>
+        </div>
+      )}
+
+      {/* Barra lateral fixa — só no desktop */}
       <aside
-        className="w-[216px] shrink-0 flex flex-col gap-7 px-[14px] py-5"
+        className="hidden md:flex w-[216px] shrink-0 flex-col gap-7 px-[14px] py-5"
         style={{ background: 'var(--surface)', borderRight: '1px solid var(--line)' }}
       >
-        <div className="flex items-center gap-[9px] px-1.5">
-          <span className="w-[30px] h-[30px] rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--brand)' }}>
-            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" style={{ stroke: 'var(--surface)' }}>
-              <path d="M4 8l2-4h12l2 4" />
-              <path d="M4 8h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8z" />
-              <path d="M9 12v4M15 12v4" />
-            </svg>
-          </span>
-          <strong className="text-[15px] font-extrabold">CantinMoci</strong>
-        </div>
-
-        <nav className="flex flex-col gap-0.5">
-          {ITENS_NAV.filter((item) => !item.somenteAdmin || usuario?.cargo === 'ADMIN').map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                `flex items-center gap-2.5 h-[38px] px-2.5 rounded-lg text-[13.5px] font-semibold transition-colors ${
-                  isActive ? '' : 'hover:opacity-80'
-                }`
-              }
-              style={({ isActive }) => ({
-                background: isActive ? 'var(--brand-tint)' : 'transparent',
-                color: isActive ? 'var(--brand-strong)' : 'var(--ink-soft)',
-              })}
-            >
-              <Icone>{item.icone}</Icone>
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="mt-auto pt-[14px]" style={{ borderTop: '1px solid var(--line)' }}>
-          <div className="flex items-center gap-2.5">
-            <span
-              className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-              style={{ background: 'var(--accent-tint)', color: 'var(--accent)' }}
-            >
-              {iniciais}
-            </span>
-            <span className="min-w-0">
-              <strong className="block text-[12.5px] truncate">{usuario?.nome}</strong>
-              <span className="block text-[11px]" style={{ color: 'var(--ink-faint)' }}>{usuario?.cargo}</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-3 mt-2.5 pl-[2px]">
-            <button
-              onClick={() => setModalSenha(true)}
-              className="text-[11px] font-semibold"
-              style={{ color: 'var(--ink-faint)' }}
-            >
-              Trocar senha
-            </button>
-            <button
-              onClick={logout}
-              className="text-[11px] font-semibold"
-              style={{ color: 'var(--ink-faint)' }}
-            >
-              Sair
-            </button>
-          </div>
-        </div>
+        <ConteudoMenu usuario={usuario} onTrocarSenha={() => setModalSenha(true)} onSair={logout} />
       </aside>
 
       {modalSenha && (
@@ -178,10 +235,10 @@ export default function AppShell() {
       )}
 
       <div className="flex-1 min-w-0 flex flex-col">
-        <div className="h-[60px] shrink-0 flex items-center justify-between px-6" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)' }}>
+        <div className="hidden md:flex h-[60px] shrink-0 items-center justify-between px-6" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--line)' }}>
           <h2 className="text-base font-semibold">{titulo}</h2>
         </div>
-        <div className="p-6 overflow-x-auto">
+        <div className="p-4 md:p-6 overflow-x-auto">
           <Outlet />
         </div>
       </div>

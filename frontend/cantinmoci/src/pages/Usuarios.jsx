@@ -82,7 +82,43 @@ export default function Usuarios() {
 
       {erro && <p className="text-[13px] mb-3 px-1" style={{ color: 'var(--danger)' }}>{erro}</p>}
 
-      <div className="rounded-xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+      {/* Celular/tablet: lista de cartões */}
+      <div className="md:hidden flex flex-col gap-2.5">
+        {usuarios.map((u) => {
+          const souEu = u.id === usuarioLogado.id
+          return (
+            <div key={u.id} className="rounded-xl p-4" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[13.5px] font-semibold m-0 truncate">
+                    {u.nome}{souEu && <span style={{ color: 'var(--ink-faint)' }}> (você)</span>}
+                  </p>
+                  <p className="text-[12.5px] m-0 mt-0.5 truncate" style={{ color: 'var(--ink-soft)' }}>{u.email}</p>
+                </div>
+                <span
+                  className="inline-flex items-center h-[22px] px-2.5 rounded-full text-[11.5px] font-bold shrink-0"
+                  style={{ background: 'var(--brand-tint)', color: 'var(--brand-strong)' }}
+                >
+                  {u.cargo}
+                </span>
+              </div>
+              <div className="flex gap-3 mt-2.5">
+                <button onClick={() => setParaResetarSenha(u)} className="text-[12.5px] font-semibold" style={{ color: 'var(--brand-strong)' }}>
+                  Resetar senha
+                </button>
+                {!souEu && (
+                  <button onClick={() => setParaDesativar(u)} className="text-[12.5px] font-semibold" style={{ color: 'var(--danger)' }}>
+                    Desativar
+                  </button>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Desktop: tabela */}
+      <div className="hidden md:block rounded-xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
         <table className="w-full text-[13.5px]" style={{ tableLayout: 'fixed' }}>
           <colgroup>
             <col style={{ width: '28%' }} />

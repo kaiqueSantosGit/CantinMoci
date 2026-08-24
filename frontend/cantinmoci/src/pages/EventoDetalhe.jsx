@@ -103,7 +103,7 @@ export default function EventoDetalhe() {
         ← Voltar pra eventos
       </Link>
 
-      <div className="rounded-xl p-5 mb-5 flex items-center justify-between" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+      <div className="rounded-xl p-5 mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
         <div>
           <h3 className="text-base font-semibold mb-1">{evento.nome}</h3>
           <p className="text-[13px] m-0" style={{ color: 'var(--ink-faint)' }}>
@@ -119,7 +119,7 @@ export default function EventoDetalhe() {
         {aberto && (
           <button
             onClick={() => setConfirmandoEncerrar(true)}
-            className="h-9 px-3.5 rounded-lg text-[13px] font-bold shrink-0"
+            className="h-9 px-3.5 rounded-lg text-[13px] font-bold shrink-0 self-start sm:self-auto"
             style={{ background: 'var(--danger-tint)', color: 'var(--danger)' }}
           >
             Encerrar evento
@@ -131,7 +131,7 @@ export default function EventoDetalhe() {
         <p className="text-[13px] mb-3 px-1" style={{ color: 'var(--danger)' }}>{erro}</p>
       )}
 
-      <div className="grid gap-5" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="rounded-xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
           <div className="px-5 py-3.5" style={{ borderBottom: '1px solid var(--line)' }}>
             <h4 className="text-[14.5px] font-semibold m-0">Estoque alocado</h4>
@@ -199,7 +199,7 @@ export default function EventoDetalhe() {
             <h4 className="text-[14.5px] font-semibold m-0">Relatório</h4>
           </div>
 
-          <div className="grid grid-cols-3 gap-2.5 p-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-5">
             <div className="rounded-lg p-3" style={{ background: 'var(--surface-sunken)' }}>
               <div className="text-[11px] font-semibold" style={{ color: 'var(--ink-faint)' }}>Arrecadado</div>
               <div className="text-base font-semibold num mt-1">{moeda(relatorio.valorTotalArrecadado)}</div>

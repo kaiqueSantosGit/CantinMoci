@@ -76,50 +76,76 @@ export default function Produtos() {
         </p>
       )}
 
-      <div className="rounded-xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
-        {!carregando && produtos.length === 0 && !erro ? (
-          <div className="text-center py-10">
-            <p className="text-sm font-semibold mb-1">Nenhum produto cadastrado</p>
-            <p className="text-[13px] m-0" style={{ color: 'var(--ink-faint)' }}>
-              Clique em "+ Novo produto" pra cadastrar o primeiro.
-            </p>
-          </div>
-        ) : (
-          <table className="w-full text-[13.5px]" style={{ tableLayout: 'fixed' }}>
-            <colgroup>
-              <col style={{ width: '46%' }} />
-              <col style={{ width: '18%' }} />
-              <col style={{ width: '18%' }} />
-              <col style={{ width: '18%' }} />
-            </colgroup>
-            <thead>
-              <tr>
-                <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Produto</th>
-                <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Preço</th>
-                <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Estoque</th>
-                <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {produtos.map((produto) => (
-                <tr key={produto.id}>
-                  <td className="py-3 px-5" style={{ borderBottom: '1px solid var(--line)' }}>{produto.nome}</td>
-                  <td className="py-3 px-5 num" style={{ borderBottom: '1px solid var(--line)' }}>{moeda(produto.preco)}</td>
-                  <td className="py-3 px-5 num" style={{ borderBottom: '1px solid var(--line)' }}>{produto.quantidadeEmEstoque}</td>
-                  <td className="py-3 px-5 text-right" style={{ borderBottom: '1px solid var(--line)' }}>
-                    <button onClick={() => setModal(produto)} className="text-[12.5px] font-semibold mr-3" style={{ color: 'var(--brand-strong)' }}>
+      {!carregando && produtos.length === 0 && !erro ? (
+        <div className="rounded-xl text-center py-10" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+          <p className="text-sm font-semibold mb-1">Nenhum produto cadastrado</p>
+          <p className="text-[13px] m-0" style={{ color: 'var(--ink-faint)' }}>
+            Clique em "+ Novo produto" pra cadastrar o primeiro.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Celular/tablet: lista de cartões — uma tabela de largura fixa não cabe numa tela pequena */}
+          <div className="md:hidden flex flex-col gap-2.5">
+            {produtos.map((produto) => (
+              <div key={produto.id} className="rounded-xl p-4" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+                <div className="flex items-start justify-between gap-3">
+                  <span className="text-[13.5px] font-semibold">{produto.nome}</span>
+                  <span className="text-[14px] font-semibold num shrink-0" style={{ color: 'var(--brand-strong)' }}>{moeda(produto.preco)}</span>
+                </div>
+                <div className="flex items-center justify-between mt-2.5">
+                  <span className="text-[12.5px] num" style={{ color: 'var(--ink-faint)' }}>{produto.quantidadeEmEstoque} em estoque</span>
+                  <div className="flex gap-3">
+                    <button onClick={() => setModal(produto)} className="text-[12.5px] font-semibold" style={{ color: 'var(--brand-strong)' }}>
                       Editar
                     </button>
                     <button onClick={() => setParaDesativar(produto)} className="text-[12.5px] font-semibold" style={{ color: 'var(--danger)' }}>
                       Desativar
                     </button>
-                  </td>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: tabela */}
+          <div className="hidden md:block rounded-xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
+            <table className="w-full text-[13.5px]" style={{ tableLayout: 'fixed' }}>
+              <colgroup>
+                <col style={{ width: '46%' }} />
+                <col style={{ width: '18%' }} />
+                <col style={{ width: '18%' }} />
+                <col style={{ width: '18%' }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Produto</th>
+                  <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Preço</th>
+                  <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}>Estoque</th>
+                  <th className="text-left text-[11.5px] uppercase tracking-wide font-bold py-2.5 px-5" style={{ color: 'var(--ink-faint)', borderBottom: '1px solid var(--line)' }}></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+              </thead>
+              <tbody>
+                {produtos.map((produto) => (
+                  <tr key={produto.id}>
+                    <td className="py-3 px-5" style={{ borderBottom: '1px solid var(--line)' }}>{produto.nome}</td>
+                    <td className="py-3 px-5 num" style={{ borderBottom: '1px solid var(--line)' }}>{moeda(produto.preco)}</td>
+                    <td className="py-3 px-5 num" style={{ borderBottom: '1px solid var(--line)' }}>{produto.quantidadeEmEstoque}</td>
+                    <td className="py-3 px-5 text-right" style={{ borderBottom: '1px solid var(--line)' }}>
+                      <button onClick={() => setModal(produto)} className="text-[12.5px] font-semibold mr-3" style={{ color: 'var(--brand-strong)' }}>
+                        Editar
+                      </button>
+                      <button onClick={() => setParaDesativar(produto)} className="text-[12.5px] font-semibold" style={{ color: 'var(--danger)' }}>
+                        Desativar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       {modal && (
         <ProdutoFormModal

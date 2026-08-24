@@ -119,7 +119,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-5" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="rounded-xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--line)' }}>
           <div className="px-5 py-3.5" style={{ borderBottom: '1px solid var(--line)' }}>
             <h4 className="text-[14.5px] font-semibold m-0">Últimas vendas</h4>
